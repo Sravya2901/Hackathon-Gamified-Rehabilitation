@@ -1,0 +1,68 @@
+Can you help me build a complete website for a gamified rehabilitation platform?
+
+Here’s what I need:
+
+🔹 GENERAL:
+- Use HTML, CSS, and JavaScript (no backend needed for now)
+- Make it responsive and visually engaging with attractive colors
+- Include navigation and make sure all buttons and pages work
+- Use localStorage to simulate login/logout and track session info
+
+🔹 PAGES I NEED:
+
+1. index.html (Landing Page)
+- Title: “Gamified Rehab for Better Recovery”
+- Subtitle: “Engage. Recover. Progress.”
+- Include Login and Signup buttons
+- Show a small animation or preview image of the game
+
+2. login.html
+- Email, Password inputs
+- Role selector (User or Doctor)
+- Login button
+- Link to Signup
+
+3. signup.html
+- Name, Email, Password, Confirm Password
+- Role selector (User or Doctor)
+- Signup button
+
+4. user-dashboard.html
+- Welcome message (e.g., “Hi, Alex!”)
+- Buttons: “Play Game”, “View Today’s Report”, “Weekly Summary”
+- Chart area to show: Score trend, Reaction time, Active streak
+- Use Chart.js for graphs
+
+5. doctor-dashboard.html
+- Welcome message (e.g., “Welcome, Dr. Smith”)
+- List of patients with cards showing: Name, Last session, Mini graph, View Details button
+
+6. doctor-patient.html
+- Show patient’s name and details
+- Graphs for: Score over time, Reaction time, Lives lost
+- Optional: A notes section for the doctor to write feedback
+
+7. user-game.html
+- Embed or link a hand-tracking game (I will add it myself)
+- After the game ends, store score/performance in localStorage
+- “Return to Dashboard” button
+
+8. profile.html (Optional)
+- Allow users to edit info, change password, and logout
+
+🔹 FOLDER STRUCTURE:
+- /index.html
+- /login.html
+- /signup.html
+- /user-dashboard.html
+- /doctor-dashboard.html
+- /doctor-patient.html
+- /user-game.html
+- /profile.html
+- /css/style.css
+- /js/main.js
+- /js/graph.js (for Chart.js logic)
+- /js/game.js (for handling score/game connection)
+- /assets/ (images, game preview gif, icons, etc.)
+
+Please make sure all buttons and page navigation work. I will later add the actual game logic to game.js and game.html — just leave placeholders and setup ready for it.

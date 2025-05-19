@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Exercises | NeuroQuest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      .dashboard {
+        padding: 60px 0;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .dashboard-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        color: #343a40;
+      }
+
+      .dashboard-tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 30px;
+      }
+
+      .dashboard-tab {
+        padding: 15px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        color: #6c757d;
+        transition: all 0.2s;
+      }
+
+      .dashboard-tab.active {
+        color: #4c6ef5;
+      }
+
+      .dashboard-tab.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #4c6ef5;
+      }
+
+      .dashboard-tab:hover {
+        color: #4c6ef5;
+      }
+
+      .dashboard-content {
+        display: none;
+      }
+
+      .dashboard-content.active {
+        display: block;
+      }
+
+      .game-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .game-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+      }
+
+      .game-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      .game-img {
+        height: 180px;
+        width: 100%;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .game-tag {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 5px 12px;
+        background-color: #4c6ef5;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .game-info {
+        padding: 20px;
+      }
+
+      .game-title {
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+        color: #343a40;
+      }
+
+      .game-description {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      .game-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+
+      .game-stat {
+        display: flex;
+        align-items: center;
+      }
+
+      .game-stat i {
+        margin-right: 5px;
+        color: #4c6ef5;
+      }
+
+      .game-button {
+        display: inline-block;
+        padding: 12px 20px;
+        background-color: #4c6ef5;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        width: 100%;
+        text-align: center;
+      }
+
+      .game-button:hover {
+        background-color: #3b5bdb;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(76, 110, 245, 0.2);
+      }
+
+      .achievement-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+      }
+
+      .achievement-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+      }
+
+      .achievement-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      }
+
+      .achievement-icon {
+        font-size: 30px;
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(76, 110, 245, 0.1);
+        border-radius: 50%;
+        color: #4c6ef5;
+      }
+
+      .achievement-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        color: #343a40;
+      }
+
+      .achievement-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+      }
+
+      .achievement-date {
+        font-size: 0.8rem;
+        color: #adb5bd;
+      }
+
+      .achievement-locked {
+        opacity: 0.6;
+      }
+
+      .achievement-locked .achievement-icon {
+        background-color: #f1f3f5;
+        color: #adb5bd;
+      }
+
+      .game-emoji {
+        font-size: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background-color: #f8f9fa;
+      }
+
+      .achievement-emoji {
+        font-size: 40px;
+        margin-bottom: 15px;
+      }
+      .accordion-container {
+        margin-top: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .accordion-item {
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .accordion-header {
+        background-color: #4c6ef5;
+        color: white;
+        padding: 15px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+      }
+
+      .accordion-header:hover {
+        background-color: #3b5bdb;
+      }
+
+      .accordion-header i {
+        transition: transform 0.3s ease;
+      }
+
+      .accordion-header.active i {
+        transform: rotate(180deg);
+      }
+
+      .accordion-content {
+        display: none;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Dashboard -->
+    <section class="dashboard">
+      <div class="container">
+        <div class="dashboard-header">
+          <div>
+            <h1>My Exercises</h1>
+            <p>Explore available exercises and track your achievements</p>
+          </div>
+          <div class="user-info">
+            <h3>Welcome, <span class="user-name">User</span></h3>
+          </div>
+        </div>
+
+        <div class="dashboard-tabs">
+          <div class="dashboard-tab active" data-tab="games">
+            <i class="fas fa-gamepad"></i> Available Games
+          </div>
+          <div class="dashboard-tab" data-tab="achievements">
+            <i class="fas fa-trophy"></i> My Achievements
+          </div>
+        </div>
+
+        <div class="dashboard-content active" id="games-content">
+            <div class="accordion-container">
+                <div class="accordion-item">
+                    <div class="accordion-header"><span>Hand Coordination Games</span><i class="fas fa-chevron-down"></i></div>
+                          <div class="accordion-content">
+                                    <div class="game-cards">
+                                        <!-- Fruit Ninja Game -->
+                                        <div class="game-card">
+                                          <div class="game-img" style="background-color: #4c6ef5">
+                                            <div class="game-emoji">🍎</div>
+                                            <span class="game-tag">Beginner</span>
+                                          </div>
+                                          <div class="game-info">
+                                            <h3 class="game-title">Fruit Ninja</h3>
+                                            <p class="game-description">
+                                              Slice fruits with your hand while avoiding bombs. Improves
+                                              coordination, reaction time, and full hand movement range.
+                                            </p>
+                                            <div class="game-stats">
+                                              <div class="game-stat">
+                                                <i class="fas fa-clock"></i>
+                                                <span>1-2 minutes</span>
+                                              </div>
+                                              <div class="game-stat">
+                                                <i class="fas fa-hand-paper"></i>
+                                                <span>All fingers/hand</span>
+                                              </div>
+                                            </div>
+                                            <a href="/user-game" class="game-button">Start Game</a>
+                                          </div>
+                                        </div>
+                                                    <!-- Balloon Pop Game -->
+            <div class="game-card">
+              <div class="game-img" style="background-color: #ff6b6b">
+                <div class="game-emoji">🎈</div>
+                <span class="game-tag">Beginner</span>
+              </div>
+              <div class="game-info">
+                <h3 class="game-title">Balloon Pop</h3>
+                <p class="game-description">
+                  Pop balloons with your index finger to improve precision and
+                  targeting. Great for early rehabilitation stages.
+                </p>
+                <div class="game-stats">
+                  <div class="game-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>1-2 minutes</span>
+                  </div>
+                  <div class="game-stat">
+                    <i class="fas fa-hand-pointer"></i>
+                    <span>Index finger</span>
+                  </div>
+                </div>
+                <a href="/balloon-game" class="game-button">Start Game</a>
+              </div>
+            </div>
+                                    </div>
+                                  </div>
+                              </div>
+                                <div class="accordion-item">
+                                    <div class="accordion-header"><span>Upper Body Rehabilitation Games</span><i class="fas fa-chevron-down"></i></div>
+                                    <div class="accordion-content">
+                                            <div class="game-cards">
+                                                <!-- Volleyball Game -->
+                                                <div class="game-card">
+                                                  <div class="game-img" style="background-color: #4c6ef5">
+                                                    <div class="game-emoji">🏐</div>
+                                                    <span class="game-tag">Beginner</span>
+                                                  </div>
+                                                  <div class="game-info">
+                                                    <h3 class="game-title">Volleyball</h3>
+                                                    <p class="game-description">
+                                                      Play volleyball while moving your hands above your head. Improves
+                                                      coordination, reaction time, and shoulder movement range.
+                                                    </p>
+                                                    <div class="game-stats">
+                                                      <div class="game-stat">
+                                                        <i class="fas fa-clock"></i>
+                                                        <span>1-2 minutes</span>
+                                                      </div>
+                                                      <div class="game-stat">
+                                                        <i class="fas fa-hand-paper"></i>
+                                                        <span>Shoulder/Upper Body</span>
+                                                      </div>
+                                                    </div>
+                                                    <a href="/volleyball" class="game-button">Start Game</a>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                    </div>
+                                </div>
+                                 <div class="accordion-item">
+                                    <div class="accordion-header"><span>Full Body Rehabilitation Games</span><i class="fas fa-chevron-down"></i></div>
+                                    <div class="accordion-content">
+                                            <div class="game-cards">
+                                                <!-- Volleyball Game -->
+                                                <div class="game-card">
+                                                  <div class="game-img" style="background-color: #4c6ef5">
+                                                   <div class="game-emoji">🚗</div> <!-- Car -->
+                                                    <span class="game-tag">Beginner</span>
+                                                  </div>
+                                                  <div class="game-info">
+                                                    <h3 class="game-title">Body Controlled Car Game</h3>
+                                                    <p class="game-description">
+                                                      Play this game by moving your body. Be careful with obstacles, do not dodge them by your car. 
+                                                      Be mindful of your body movement since your movement controls the car 
+                                                    </p>
+                                                    <div class="game-stats">
+                                                      <div class="game-stat">
+                                                        <i class="fas fa-clock"></i>
+                                                        <span>1-2 minutes</span>
+                                                      </div>
+                                                      <div class="game-stat">
+                                                        <i class="fas fa-hand-paper"></i>
+                                                        <span>Full Body</span>
+                                                      </div>
+                                                    </div>
+                                                    <a href="/posturegame" class="game-button">Start Game</a>
+                                                  </div>
+                                                </div>
+                                                <div class="game-card">
+                                                  <div class="game-img" style="background-color: #4c6ef5">
+                                                    <div class="game-emoji">⚽</div> <!-- Football -->
+                                                    <span class="game-tag">Beginner</span>
+                                                  </div>
+                                                  <div class="game-info">
+                                                    <h3 class="game-title">Ball Pop Game With Legs</h3>
+                                                    <p class="game-description">
+                                                      Play this game by moving your legs. Pop the balls by using your legs. You will see a avtar of your body on the screen.
+                                                      It will show you your movements, by using hit hit the balls
+                                                    </p>
+                                                    <div class="game-stats">
+                                                      <div class="game-stat">
+                                                        <i class="fas fa-clock"></i>
+                                                        <span>1-2 minutes</span>
+                                                      </div>
+                                                      <div class="game-stat">
+                                                        <i class="fas fa-hand-paper"></i>
+                                                        <span>Full Body</span>
+                                                      </div>
+                                                    </div>
+                                                    <a href="/leg-game" class="game-button">Start Game</a>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                    </div>
+                                            </div>
+
+                            </div>
+          <!--
+          <div class="game-cards">
+            
+            <div class="game-card">
+              <div class="game-img" style="background-color: #4c6ef5">
+                <div class="game-emoji">🍎</div>
+                <span class="game-tag">Beginner</span>
+              </div>
+              <div class="game-info">
+                <h3 class="game-title">Fruit Ninja</h3>
+                <p class="game-description">
+                  Slice fruits with your hand while avoiding bombs. Improves
+                  coordination, reaction time, and full hand movement range.
+                </p>
+                <div class="game-stats">
+                  <div class="game-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>1-2 minutes</span>
+                  </div>
+                  <div class="game-stat">
+                    <i class="fas fa-hand-paper"></i>
+                    <span>All fingers/hand</span>
+                  </div>
+                </div>
+                <a href="/user-game" class="game-button">Start Game</a>
+              </div>
+            </div>
+
+            
+            <div class="game-card">
+              <div class="game-img" style="background-color: #ff6b6b">
+                <div class="game-emoji">🎈</div>
+                <span class="game-tag">Beginner</span>
+              </div>
+              <div class="game-info">
+                <h3 class="game-title">Balloon Pop</h3>
+                <p class="game-description">
+                  Pop balloons with your index finger to improve precision and
+                  targeting. Great for early rehabilitation stages.
+                </p>
+                <div class="game-stats">
+                  <div class="game-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>3-5 minutes</span>
+                  </div>
+                  <div class="game-stat">
+                    <i class="fas fa-hand-pointer"></i>
+                    <span>Index finger</span>
+                  </div>
+                </div>
+                <a href="/balloon-game" class="game-button">Start Game</a>
+              </div>
+            </div>
+
+            
+            <div class="game-card">
+              <div class="game-img" style="background-color: #20c997">
+                <div class="game-emoji">🎹</div>
+                <span class="game-tag">Intermediate</span>
+              </div>
+              <div class="game-info">
+                <h3 class="game-title">Piano Master</h3>
+                <p class="game-description">
+                  Play piano notes in sequence to improve finger independence,
+                  coordination and fine motor control.
+                </p>
+                <div class="game-stats">
+                  <div class="game-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>1-2 minutes</span>
+                  </div>
+                  <div class="game-stat">
+                    <i class="fas fa-hand-pointer"></i>
+                    <span>Individual fingers</span>
+                  </div>
+                </div>
+                <a href="#" class="game-button">Coming Soon</a>
+              </div>
+            </div>
+
+            
+            <div class="game-card">
+              <div class="game-img" style="background-color: #7950f2">
+                <div class="game-emoji">🧘</div>
+                <span class="game-tag">All Levels</span>
+              </div>
+              <div class="game-info">
+                <h3 class="game-title">Hand Yoga</h3>
+                <p class="game-description">
+                  Follow hand poses to improve flexibility, strength and range
+                  of motion with guided stretching exercises.
+                </p>
+                <div class="game-stats">
+                  <div class="game-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>10-15 minutes</span>
+                  </div>
+                  <div class="game-stat">
+                    <i class="fas fa-hand-paper"></i>
+                    <span>Full hand</span>
+                  </div>
+                </div>
+                <a href="#" class="game-button">Coming Soon</a>
+              </div>
+            </div>
+          </div>-->
+        </div>
+
+        <div class="dashboard-content" id="achievements-content">
+          <div class="achievement-cards">
+            <!-- Unlocked Achievements -->
+            <div class="achievement-card">
+              <div class="achievement-emoji">🥇</div>
+              <h3 class="achievement-title">First Game Completed</h3>
+              <p class="achievement-description">
+                Successfully completed your first rehabilitation game
+              </p>
+              <p class="achievement-date">Earned on May 12, 2025</p>
+            </div>
+
+            <div class="achievement-card">
+              <div class="achievement-emoji">🔥</div>
+              <h3 class="achievement-title">3-Day Streak</h3>
+              <p class="achievement-description">
+                Practiced rehabilitation exercises for 3 consecutive days
+              </p>
+              <p class="achievement-date">Earned on May 12, 2025</p>
+            </div>
+
+            <div class="achievement-card">
+              <div class="achievement-emoji">⚡</div>
+              <h3 class="achievement-title">Quick Reflexes</h3>
+              <p class="achievement-description">
+                Achieved an average reaction time under 500ms
+              </p>
+              <p class="achievement-date">Earned on May 12, 2025</p>
+            </div>
+          </div>
+      </div>
+
+
+    <!-- Footer -->
+
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      // Tab switching functionality
+      const tabs = document.querySelectorAll(".dashboard-tab");
+      const contents = document.querySelectorAll(".dashboard-content");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.tab;
+      
+          // Remove active class from all tabs
+          tabs.forEach((t) => t.classList.remove("active"));
+      
+          // Add active class to clicked tab
+          tab.classList.add("active");
+      
+          // Hide all content
+          contents.forEach((content) => content.classList.remove("active"));
+      
+          // Show selected content
+          const targetContent = document.getElementById(`${target}-content`);
+          if (targetContent) {
+            targetContent.classList.add("active");
+          } else {
+            console.error(`Content with id "${target}-content" not found.`);
+          }
+        });
+      });
+
+      // Update user name
+      const user = getCurrentUser();
+      if (user) {
+        const userName = document.querySelector(".user-name");
+        if (userName) {
+          userName.textContent = user.name || "User";
+        }
+      }
+    </script>
+    <script>
+        // Accordion functionality
+        const accordionHeaders = document.querySelectorAll(".accordion-header");
+  
+        accordionHeaders.forEach((header) => {
+          header.addEventListener("click", () => {
+            const accordionContent = header.nextElementSibling;
+            const icon = header.querySelector("i");
+  
+            // Toggle active class for the header
+            header.classList.toggle("active");
+  
+            // Expand or collapse the content
+            if (accordionContent.style.display === "block") {
+              accordionContent.style.display = "none";
+            } else {
+              accordionContent.style.display = "block";
+            }
+  
+            // Rotate the icon
+            icon.classList.toggle("active");
+          });
+        });
+      </script>
+      
+  </body>
+</html>

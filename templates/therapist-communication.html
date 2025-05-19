@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Communication | NeuroQuest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      .communication-section {
+        padding: 60px 0;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .section-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        color: #343a40;
+      }
+
+      .chat-container {
+        display: flex;
+        height: 70vh;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .patient-sidebar {
+        width: 280px;
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        overflow-y: auto;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .search-box {
+        position: relative;
+        margin-bottom: 10px;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      .search-box i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+      }
+
+      .patient-tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .patient-tab {
+        padding: 12px 15px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #6c757d;
+        position: relative;
+        flex-grow: 1;
+        text-align: center;
+        transition: all 0.2s;
+      }
+
+      .patient-tab.active {
+        color: #4c6ef5;
+      }
+
+      .patient-tab.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: #4c6ef5;
+      }
+
+      .patient-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .patient-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f3f5;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .patient-item:hover,
+      .patient-item.active {
+        background-color: #e9ecef;
+      }
+
+      .patient-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .patient-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4c6ef5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 15px;
+        font-size: 1rem;
+      }
+
+      .patient-details {
+        flex: 1;
+      }
+
+      .patient-name {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+
+      .patient-name h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #343a40;
+      }
+
+      .patient-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+      }
+
+      .patient-message {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #6c757d;
+        font-size: 0.85rem;
+      }
+
+      .message-preview {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+      }
+
+      .unread-count {
+        background-color: #4c6ef5;
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      .chat-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+      }
+
+      .chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4c6ef5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 15px;
+        font-size: 1rem;
+      }
+
+      .chat-name {
+        flex: 1;
+      }
+
+      .chat-name h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #343a40;
+      }
+
+      .chat-name p {
+        margin: 5px 0 0;
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+
+      .chat-actions {
+        display: flex;
+        gap: 15px;
+      }
+
+      .chat-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .chat-action:hover {
+        background-color: #e9ecef;
+        color: #4c6ef5;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+      }
+
+      .message {
+        margin-bottom: 20px;
+        max-width: 70%;
+      }
+
+      .message-incoming {
+        align-self: flex-start;
+      }
+
+      .message-outgoing {
+        align-self: flex-end;
+        margin-left: auto;
+      }
+
+      .message-content {
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .message-incoming .message-content {
+        background-color: white;
+        color: #343a40;
+        border: 1px solid #dee2e6;
+        border-top-left-radius: 0;
+      }
+
+      .message-outgoing .message-content {
+        background-color: #4c6ef5;
+        color: white;
+        border-top-right-radius: 0;
+      }
+
+      .message-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+        margin-top: 5px;
+        text-align: right;
+      }
+
+      .chat-input {
+        padding: 15px;
+        border-top: 1px solid #dee2e6;
+      }
+
+      .input-container {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px 15px;
+      }
+
+      .input-container input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 0;
+        font-size: 0.95rem;
+        color: #343a40;
+      }
+
+      .input-container input:focus {
+        outline: none;
+      }
+
+      .input-actions {
+        display: flex;
+        gap: 15px;
+        margin-left: 15px;
+      }
+
+      .input-action {
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .input-action:hover {
+        color: #4c6ef5;
+      }
+
+      .send-btn {
+        background-color: #4c6ef5;
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: 15px;
+      }
+
+      .send-btn:hover {
+        background-color: #3b5bdb;
+        transform: scale(1.05);
+      }
+
+      .no-selection {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .no-selection i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+      }
+
+      .no-selection h3 {
+        margin: 0 0 10px;
+        font-size: 1.4rem;
+        color: #6c757d;
+      }
+
+      .no-selection p {
+        max-width: 350px;
+        font-size: 0.95rem;
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      .patient-status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .status-online {
+        background-color: rgba(32, 201, 151, 0.15);
+        color: #20c997;
+      }
+
+      .status-away {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+      }
+
+      .patient-detail {
+        display: flex;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 3px;
+      }
+
+      .patient-detail i {
+        margin-right: 5px;
+        font-size: 0.7rem;
+      }
+
+      .view-details-btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        background-color: #f8f9fa;
+        color: #495057;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-left: auto;
+        transition: all 0.2s;
+      }
+
+      .view-details-btn:hover {
+        background-color: #e9ecef;
+        color: #4c6ef5;
+      }
+
+      @media (max-width: 768px) {
+        .chat-container {
+          flex-direction: column;
+          height: 85vh;
+        }
+
+        .patient-sidebar {
+          width: 100%;
+          max-height: 30%;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+      }
+
+      /* Responsive tweaks */
+      @media (max-width: 576px) {
+        .patient-sidebar {
+          max-height: 35%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Communication Section -->
+    <section class="communication-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h1>Patient Communications</h1>
+            <p>Chat with your patients about their progress and exercises</p>
+          </div>
+        </div>
+
+        <div class="chat-container">
+          <div class="patient-sidebar">
+            <div class="sidebar-header">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search patients..." />
+              </div>
+            </div>
+
+            <div class="patient-tabs">
+              <div class="patient-tab active" data-tab="recent">Recent</div>
+              <div class="patient-tab" data-tab="all">All Patients</div>
+            </div>
+
+            <ul class="patient-list" id="recent-patients">
+              <li
+                class="patient-item active"
+                onclick="selectPatient('john-doe')"
+              >
+                <div class="patient-info">
+                  <div class="patient-avatar">JD</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>
+                        John Doe
+                        <span class="patient-status status-online">Online</span>
+                      </h4>
+                      <span class="patient-time">10:30 AM</span>
+                    </div>
+                    <div class="patient-message">
+                      <span class="message-preview"
+                        >The pain has decreased quite a bit. I still have some
+                        difficulty with pinching...</span
+                      >
+                      <span class="unread-count">1</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="patient-item" onclick="selectPatient('alice-smith')">
+                <div class="patient-info">
+                  <div class="patient-avatar">AS</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>Alice Smith</h4>
+                      <span class="patient-time">Yesterday</span>
+                    </div>
+                    <div class="patient-message">
+                      <span class="message-preview"
+                        >Thank you for the new exercise recommendations!</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li
+                class="patient-item"
+                onclick="selectPatient('robert-johnson')"
+              >
+                <div class="patient-info">
+                  <div class="patient-avatar">RJ</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>
+                        Robert Johnson
+                        <span class="patient-status status-away">Away</span>
+                      </h4>
+                      <span class="patient-time">Apr 8</span>
+                    </div>
+                    <div class="patient-message">
+                      <span class="message-preview"
+                        >I've been doing the exercises daily as
+                        recommended...</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <ul class="patient-list" id="all-patients" style="display: none">
+              <li
+                class="patient-item active"
+                onclick="selectPatient('john-doe')"
+              >
+                <div class="patient-info">
+                  <div class="patient-avatar">JD</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>John Doe</h4>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-calendar-alt"></i>
+                      <span>42 years</span>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-briefcase-medical"></i>
+                      <span>Hand Injury</span>
+                      <button
+                        class="view-details-btn"
+                        onclick="window.location.href='/patient-details'"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="patient-item" onclick="selectPatient('alice-smith')">
+                <div class="patient-info">
+                  <div class="patient-avatar">AS</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>Alice Smith</h4>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-calendar-alt"></i>
+                      <span>35 years</span>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-briefcase-medical"></i>
+                      <span>Wrist Surgery</span>
+                      <button
+                        class="view-details-btn"
+                        onclick="window.location.href='/patient-details'"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li
+                class="patient-item"
+                onclick="selectPatient('robert-johnson')"
+              >
+                <div class="patient-info">
+                  <div class="patient-avatar">RJ</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>Robert Johnson</h4>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-calendar-alt"></i>
+                      <span>58 years</span>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-briefcase-medical"></i>
+                      <span>Arthritis</span>
+                      <button
+                        class="view-details-btn"
+                        onclick="window.location.href='/patient-details'"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="patient-item" onclick="selectPatient('mary-brown')">
+                <div class="patient-info">
+                  <div class="patient-avatar">MB</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>Mary Brown</h4>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-calendar-alt"></i>
+                      <span>29 years</span>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-briefcase-medical"></i>
+                      <span>Finger Fracture</span>
+                      <button
+                        class="view-details-btn"
+                        onclick="window.location.href='/patient-details'"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="patient-item" onclick="selectPatient('david-wilson')">
+                <div class="patient-info">
+                  <div class="patient-avatar">DW</div>
+                  <div class="patient-details">
+                    <div class="patient-name">
+                      <h4>David Wilson</h4>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-calendar-alt"></i>
+                      <span>45 years</span>
+                    </div>
+                    <div class="patient-detail">
+                      <i class="fas fa-briefcase-medical"></i>
+                      <span>Tendon Repair</span>
+                      <button
+                        class="view-details-btn"
+                        onclick="window.location.href='/patient-details'"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="chat-content" id="chat-john-doe">
+            <div class="chat-header">
+              <div class="chat-avatar">JD</div>
+              <div class="chat-name">
+                <h3>
+                  John Doe
+                  <span class="patient-status status-online">Online</span>
+                </h3>
+                <p>Hand Injury | Last session: Today, 10:45 AM</p>
+              </div>
+              <div class="chat-actions">
+                <div
+                  class="chat-action"
+                  onclick="window.location.href='/patient-details'"
+                >
+                  <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="chat-action"><i class="fas fa-phone"></i></div>
+                <div class="chat-action"><i class="fas fa-video"></i></div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  Hello John! How are you feeling today? Have you been
+                  practicing the exercises regularly?
+                </div>
+                <div class="message-time">10:15 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Hi Dr. Smith! I'm doing well. Yes, I've been practicing daily
+                  for about 15 minutes.
+                </div>
+                <div class="message-time">10:17 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  That's excellent! I've reviewed your progress data from the
+                  Fruit Ninja game. Your reaction time has improved by 12% since
+                  last week.
+                </div>
+                <div class="message-time">10:22 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  How's your pain level? Any difficulty with specific movements?
+                </div>
+                <div class="message-time">10:23 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  The pain has decreased quite a bit. I still have some
+                  difficulty with pinching motions, but it's getting better.
+                </div>
+                <div class="message-time">10:25 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  That's good progress! I'd like you to try the new Piano Master
+                  game we just added. It focuses specifically on individual
+                  finger movements and should help with those pinching motions.
+                </div>
+                <div class="message-time">10:28 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  How's your progress with the exercises? Have you been able to
+                  try the Piano Master game yet?
+                </div>
+                <div class="message-time">10:30 AM</div>
+              </div>
+            </div>
+
+            <div class="chat-input">
+              <div class="input-container">
+                <input type="text" placeholder="Type a message..." />
+                <div class="input-actions">
+                  <div class="input-action"><i class="far fa-smile"></i></div>
+                  <div class="input-action">
+                    <i class="fas fa-paperclip"></i>
+                  </div>
+                </div>
+                <div class="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-content" id="chat-alice-smith" style="display: none">
+            <div class="chat-header">
+              <div class="chat-avatar">AS</div>
+              <div class="chat-name">
+                <h3>Alice Smith</h3>
+                <p>Wrist Surgery | Last session: Yesterday, 2:30 PM</p>
+              </div>
+              <div class="chat-actions">
+                <div
+                  class="chat-action"
+                  onclick="window.location.href='/patient-details'"
+                >
+                  <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="chat-action"><i class="fas fa-phone"></i></div>
+                <div class="chat-action"><i class="fas fa-video"></i></div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  Hi Alice, I've reviewed your recent sessions and I'm impressed
+                  with your progress. Your range of motion has increased by 20%
+                  since we started.
+                </div>
+                <div class="message-time">Yesterday, 11:30 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Thank you Dr. Smith! The exercises have been really helpful. I
+                  can now do more daily activities without pain.
+                </div>
+                <div class="message-time">Yesterday, 11:45 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  That's what we like to hear! I've added some new recommended
+                  exercises to your dashboard. They focus on improving wrist
+                  flexibility and strength. Try to do them 3 times a week.
+                </div>
+                <div class="message-time">Yesterday, 12:00 PM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Thank you for the new exercise recommendations! I'll start
+                  them today.
+                </div>
+                <div class="message-time">Yesterday, 12:15 PM</div>
+              </div>
+            </div>
+
+            <div class="chat-input">
+              <div class="input-container">
+                <input type="text" placeholder="Type a message..." />
+                <div class="input-actions">
+                  <div class="input-action"><i class="far fa-smile"></i></div>
+                  <div class="input-action">
+                    <i class="fas fa-paperclip"></i>
+                  </div>
+                </div>
+                <div class="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="chat-content"
+            id="chat-robert-johnson"
+            style="display: none"
+          >
+            <div class="chat-header">
+              <div class="chat-avatar">RJ</div>
+              <div class="chat-name">
+                <h3>
+                  Robert Johnson
+                  <span class="patient-status status-away">Away</span>
+                </h3>
+                <p>Arthritis | Last session: Apr 8, 9:15 AM</p>
+              </div>
+              <div class="chat-actions">
+                <div
+                  class="chat-action"
+                  onclick="window.location.href='/patient-details'"
+                >
+                  <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="chat-action"><i class="fas fa-phone"></i></div>
+                <div class="chat-action"><i class="fas fa-video"></i></div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Good morning Dr. Smith. I wanted to let you know that I've
+                  been doing the exercises daily as recommended, but I'm still
+                  experiencing quite a bit of pain in the mornings.
+                </div>
+                <div class="message-time">Apr 8, 8:45 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  I'm sorry to hear that, Robert. Morning stiffness is common
+                  with arthritis. Have you been applying the warm compress
+                  before starting the exercises as we discussed?
+                </div>
+                <div class="message-time">Apr 8, 9:00 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Yes, I've been using the warm compress for about 10 minutes
+                  before exercises. It helps initially, but the stiffness
+                  returns after a few hours.
+                </div>
+                <div class="message-time">Apr 8, 9:05 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  Let's adjust your treatment plan. I'd like you to try using
+                  the compress twice daily - morning and evening. Also, I'm
+                  going to recommend some gentle Hand Yoga exercises that are
+                  specifically designed for arthritis patients. They'll be
+                  available in your exercises page later today.
+                </div>
+                <div class="message-time">Apr 8, 9:15 AM</div>
+              </div>
+            </div>
+
+            <div class="chat-input">
+              <div class="input-container">
+                <input type="text" placeholder="Type a message..." />
+                <div class="input-actions">
+                  <div class="input-action"><i class="far fa-smile"></i></div>
+                  <div class="input-action">
+                    <i class="fas fa-paperclip"></i>
+                  </div>
+                </div>
+                <div class="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-selection" id="no-chat-selected" style="display: none">
+            <i class="far fa-comments"></i>
+            <h3>Select a Patient</h3>
+            <p>
+              Choose a patient from the list to view your conversation history
+              and send messages.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      // Function to select a patient and show the appropriate chat
+      function selectPatient(patientId) {
+        // Hide all chat contents
+        document.querySelectorAll(".chat-content").forEach((chat) => {
+          chat.style.display = "none";
+        });
+
+        // Show the selected chat
+        document.getElementById(`chat-${patientId}`).style.display = "flex";
+
+        // Hide the no selection message
+        document.getElementById("no-chat-selected").style.display = "none";
+
+        // Update active state in patient list
+        document.querySelectorAll(".patient-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        // Add active class to clicked patient in both tabs
+        document
+          .querySelectorAll(
+            `.patient-item[onclick="selectPatient('${patientId}')"]`
+          )
+          .forEach((item) => {
+            item.classList.add("active");
+          });
+
+        // Stop event propagation
+        event.stopPropagation();
+      }
+
+      // Send message functionality
+      document.querySelectorAll(".send-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const inputContainer = this.closest(".input-container");
+          const input = inputContainer.querySelector("input");
+          const message = input.value.trim();
+
+          if (message) {
+            // Get the chat messages container
+            const messagesContainer =
+              this.closest(".chat-content").querySelector(".chat-messages");
+
+            // Create new message element
+            const messageElement = document.createElement("div");
+            messageElement.className = "message message-outgoing";
+
+            // Get current time
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? "PM" : "AM";
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+            const timeString = `${formattedHours}:${formattedMinutes} ${ampm}`;
+
+            // Set message content
+            messageElement.innerHTML = `
+                        <div class="message-content">
+                            ${message}
+                        </div>
+                        <div class="message-time">Just now</div>
+                    `;
+
+            // Add message to chat
+            messagesContainer.appendChild(messageElement);
+
+            // Clear input
+            input.value = "";
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+      });
+
+      // Input key press event for sending message
+      document.querySelectorAll(".input-container input").forEach((input) => {
+        input.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            const sendBtn =
+              this.closest(".input-container").querySelector(".send-btn");
+            sendBtn.click();
+          }
+        });
+      });
+
+      // Tab switching functionality
+      const tabs = document.querySelectorAll(".patient-tab");
+      const patientLists = document.querySelectorAll(".patient-list");
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.dataset.tab;
+
+          // Update active tab
+          tabs.forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+
+          // Update active content
+          patientLists.forEach((list) => (list.style.display = "none"));
+          document.getElementById(`${target}-patients`).style.display = "block";
+        });
+      });
+
+      // Prevent view details button from triggering patient selection
+      document.querySelectorAll(".view-details-btn").forEach((btn) => {
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      });
+    </script>
+  </body>
+</html>

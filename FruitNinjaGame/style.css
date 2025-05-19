@@ -1,0 +1,56 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+  }
+  
+  video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1; /* Behind everything */
+  }
+  
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  #score, #lives {
+    position: fixed;
+    top: 10px;
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+    color: white;
+    background-color: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 10;
+  }
+  
+  #score {
+    left: 10px;
+  }
+  
+  #lives {
+    right: 10px;
+  }
+  
+  #reactionGraph {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    background: #222;
+    border: 2px solid #fff;
+    z-index: 10;
+  }
+  
+  
+  
+  

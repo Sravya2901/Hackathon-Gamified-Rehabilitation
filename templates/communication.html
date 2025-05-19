@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroQuest | NeuroQuest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      .communication-section {
+        padding: 60px 0;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .section-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        color: #343a40;
+      }
+
+      .chat-container {
+        display: flex;
+        height: 70vh;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .contact-sidebar {
+        width: 280px;
+        background-color: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        overflow-y: auto;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .search-box {
+        position: relative;
+        margin-bottom: 10px;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 10px 15px 10px 40px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+
+      .search-box i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+      }
+
+      .contact-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .contact-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f3f5;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .contact-item:hover,
+      .contact-item.active {
+        background-color: #e9ecef;
+      }
+
+      .contact-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .contact-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4c6ef5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 15px;
+        font-size: 1rem;
+      }
+
+      .contact-details {
+        flex: 1;
+      }
+
+      .contact-name {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+
+      .contact-name h4 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #343a40;
+      }
+
+      .contact-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+      }
+
+      .contact-message {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #6c757d;
+        font-size: 0.85rem;
+      }
+
+      .message-preview {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+      }
+
+      .unread-count {
+        background-color: #4c6ef5;
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      .chat-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+      }
+
+      .chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4c6ef5;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 15px;
+        font-size: 1rem;
+      }
+
+      .chat-name {
+        flex: 1;
+      }
+
+      .chat-name h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #343a40;
+      }
+
+      .chat-name p {
+        margin: 5px 0 0;
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+
+      .chat-actions {
+        display: flex;
+        gap: 15px;
+      }
+
+      .chat-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .chat-action:hover {
+        background-color: #e9ecef;
+        color: #4c6ef5;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+      }
+
+      .message {
+        margin-bottom: 20px;
+        max-width: 70%;
+      }
+
+      .message-incoming {
+        align-self: flex-start;
+      }
+
+      .message-outgoing {
+        align-self: flex-end;
+        margin-left: auto;
+      }
+
+      .message-content {
+        padding: 12px 15px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .message-incoming .message-content {
+        background-color: white;
+        color: #343a40;
+        border: 1px solid #dee2e6;
+        border-top-left-radius: 0;
+      }
+
+      .message-outgoing .message-content {
+        background-color: #4c6ef5;
+        color: white;
+        border-top-right-radius: 0;
+      }
+
+      .message-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+        margin-top: 5px;
+        text-align: right;
+      }
+
+      .chat-input {
+        padding: 15px;
+        border-top: 1px solid #dee2e6;
+      }
+
+      .input-container {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px 15px;
+      }
+
+      .input-container input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        padding: 0;
+        font-size: 0.95rem;
+        color: #343a40;
+      }
+
+      .input-container input:focus {
+        outline: none;
+      }
+
+      .input-actions {
+        display: flex;
+        gap: 15px;
+        margin-left: 15px;
+      }
+
+      .input-action {
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .input-action:hover {
+        color: #4c6ef5;
+      }
+
+      .send-btn {
+        background-color: #4c6ef5;
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: 15px;
+      }
+
+      .send-btn:hover {
+        background-color: #3b5bdb;
+        transform: scale(1.05);
+      }
+
+      .no-selection {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .no-selection i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+      }
+
+      .no-selection h3 {
+        margin: 0 0 10px;
+        font-size: 1.4rem;
+        color: #6c757d;
+      }
+
+      .no-selection p {
+        max-width: 350px;
+        font-size: 0.95rem;
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 768px) {
+        .chat-container {
+          flex-direction: column;
+          height: 85vh;
+        }
+
+        .contact-sidebar {
+          width: 100%;
+          max-height: 30%;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+      }
+
+      /* Responsive tweaks */
+      @media (max-width: 576px) {
+        .contact-sidebar {
+          max-height: 35%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Communication Section -->
+    <section class="communication-section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h1>Communication</h1>
+            <p>Chat with your therapist about your progress and exercises</p>
+          </div>
+        </div>
+
+        <div class="chat-container">
+          <div class="contact-sidebar">
+            <div class="sidebar-header">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search..." />
+              </div>
+            </div>
+
+            <ul class="contact-list">
+              <li
+                class="contact-item active"
+                onclick="selectContact('dr-smith')"
+              >
+                <div class="contact-info">
+                  <div class="contact-avatar">DS</div>
+                  <div class="contact-details">
+                    <div class="contact-name">
+                      <h4>Dr. Smith</h4>
+                      <span class="contact-time">10:30 AM</span>
+                    </div>
+                    <div class="contact-message">
+                      <span class="message-preview"
+                        >How's your progress with the exercises?</span
+                      >
+                      <span class="unread-count">2</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="contact-item" onclick="selectContact('dr-johnson')">
+                <div class="contact-info">
+                  <div class="contact-avatar">DJ</div>
+                  <div class="contact-details">
+                    <div class="contact-name">
+                      <h4>Dr. Johnson</h4>
+                      <span class="contact-time">Yesterday</span>
+                    </div>
+                    <div class="contact-message">
+                      <span class="message-preview"
+                        >Let me know when you're ready for the new exercise
+                        set</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li
+                class="contact-item"
+                onclick="selectContact('therapist-support')"
+              >
+                <div class="contact-info">
+                  <div class="contact-avatar">TS</div>
+                  <div class="contact-details">
+                    <div class="contact-name">
+                      <h4>Therapist Support</h4>
+                      <span class="contact-time">Apr 8</span>
+                    </div>
+                    <div class="contact-message">
+                      <span class="message-preview"
+                        >Thank you for reaching out. We'll assign a therapist
+                        soon.</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="chat-content" id="chat-dr-smith">
+            <div class="chat-header">
+              <div class="chat-avatar">DS</div>
+              <div class="chat-name">
+                <h3>Dr. Smith</h3>
+                <p>Hand Rehabilitation Specialist</p>
+              </div>
+              <div class="chat-actions">
+                <div class="chat-action"><i class="fas fa-phone"></i></div>
+                <div class="chat-action"><i class="fas fa-video"></i></div>
+                <div class="chat-action">
+                  <i class="fas fa-info-circle"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Hello! How are you feeling today? Have you been practicing the
+                  exercises regularly?
+                </div>
+                <div class="message-time">10:15 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  Hi Dr. Smith! I'm doing well. Yes, I've been practicing daily
+                  for about 15 minutes.
+                </div>
+                <div class="message-time">10:17 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  That's excellent! I've reviewed your progress data from the
+                  Fruit Ninja game. Your reaction time has improved by 12% since
+                  last week.
+                </div>
+                <div class="message-time">10:22 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  How's your pain level? Any difficulty with specific movements?
+                </div>
+                <div class="message-time">10:23 AM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  The pain has decreased quite a bit. I still have some
+                  difficulty with pinching motions, but it's getting better.
+                </div>
+                <div class="message-time">10:25 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  That's good progress! I'd like you to try the new Piano Master
+                  game we just added. It focuses specifically on individual
+                  finger movements and should help with those pinching motions.
+                </div>
+                <div class="message-time">10:28 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  How's your progress with the exercises? Have you been able to
+                  try the Piano Master game yet?
+                </div>
+                <div class="message-time">10:30 AM</div>
+              </div>
+            </div>
+
+            <div class="chat-input">
+              <div class="input-container">
+                <input type="text" placeholder="Type a message..." />
+                <div class="input-actions">
+                  <div class="input-action"><i class="far fa-smile"></i></div>
+                  <div class="input-action">
+                    <i class="fas fa-paperclip"></i>
+                  </div>
+                </div>
+                <div class="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-content" id="chat-dr-johnson" style="display: none">
+            <div class="chat-header">
+              <div class="chat-avatar">DJ</div>
+              <div class="chat-name">
+                <h3>Dr. Johnson</h3>
+                <p>Occupational Therapist</p>
+              </div>
+              <div class="chat-actions">
+                <div class="chat-action"><i class="fas fa-phone"></i></div>
+                <div class="chat-action"><i class="fas fa-video"></i></div>
+                <div class="chat-action">
+                  <i class="fas fa-info-circle"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message message-incoming">
+                <div class="message-content">
+                  I've prepared a new set of exercises for you based on your
+                  recent progress. Would you like me to explain them in detail?
+                </div>
+                <div class="message-time">Yesterday, 3:45 PM</div>
+              </div>
+
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  Yes, please! I'd appreciate that.
+                </div>
+                <div class="message-time">Yesterday, 4:02 PM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Great! The new exercise set focuses on improving your grip
+                  strength and wrist stability. I'll be adding them to your
+                  dashboard soon.
+                </div>
+                <div class="message-time">Yesterday, 4:10 PM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Let me know when you're ready for the new exercise set. We can
+                  schedule a video call to go through them together if you'd
+                  like.
+                </div>
+                <div class="message-time">Yesterday, 4:15 PM</div>
+              </div>
+            </div>
+
+            <div class="chat-input">
+              <div class="input-container">
+                <input type="text" placeholder="Type a message..." />
+                <div class="input-actions">
+                  <div class="input-action"><i class="far fa-smile"></i></div>
+                  <div class="input-action">
+                    <i class="fas fa-paperclip"></i>
+                  </div>
+                </div>
+                <div class="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="chat-content"
+            id="chat-therapist-support"
+            style="display: none"
+          >
+            <div class="chat-header">
+              <div class="chat-avatar">TS</div>
+              <div class="chat-name">
+                <h3>Therapist Support</h3>
+                <p>Support Team</p>
+              </div>
+              <div class="chat-actions">
+                <div class="chat-action">
+                  <i class="fas fa-info-circle"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-messages">
+              <div class="message message-outgoing">
+                <div class="message-content">
+                  Hello, I'm new to the platform and would like to be assigned
+                  to a therapist specializing in post-surgery rehabilitation.
+                </div>
+                <div class="message-time">Apr 8, 10:07 AM</div>
+              </div>
+
+              <div class="message message-incoming">
+                <div class="message-content">
+                  Hi there! Thank you for reaching out. We'll review your
+                  profile and assign you to a suitable therapist within 24-48
+                  hours. In the meantime, you can explore the available
+                  exercises in the "My Exercises" section.
+                </div>
+                <div class="message-time">Apr 8, 10:15 AM</div>
+              </div>
+            </div>
+
+            <div class="chat-input">
+              <div class="input-container">
+                <input type="text" placeholder="Type a message..." />
+                <div class="input-actions">
+                  <div class="input-action"><i class="far fa-smile"></i></div>
+                  <div class="input-action">
+                    <i class="fas fa-paperclip"></i>
+                  </div>
+                </div>
+                <div class="send-btn">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-selection" id="no-chat-selected" style="display: none">
+            <i class="far fa-comments"></i>
+            <h3>Select a Conversation</h3>
+            <p>
+              Choose a therapist from the list to view your conversation history
+              and send messages.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p class="footer-text">&copy; 2023 NeuroQuest. All Rights Reserved.</p>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      // Function to select a contact and show the appropriate chat
+      function selectContact(contactId) {
+        // Hide all chat contents
+        document.querySelectorAll(".chat-content").forEach((chat) => {
+          chat.style.display = "none";
+        });
+
+        // Show the selected chat
+        document.getElementById(`chat-${contactId}`).style.display = "flex";
+
+        // Hide the no selection message
+        document.getElementById("no-chat-selected").style.display = "none";
+
+        // Update active state in contact list
+        document.querySelectorAll(".contact-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        // Add active class to clicked contact
+        event.currentTarget.classList.add("active");
+      }
+
+      // Send message functionality
+      document.querySelectorAll(".send-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const inputContainer = this.closest(".input-container");
+          const input = inputContainer.querySelector("input");
+          const message = input.value.trim();
+
+          if (message) {
+            // Get the chat messages container
+            const messagesContainer =
+              this.closest(".chat-content").querySelector(".chat-messages");
+
+            // Create new message element
+            const messageElement = document.createElement("div");
+            messageElement.className = "message message-outgoing";
+
+            // Get current time
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const ampm = hours >= 12 ? "PM" : "AM";
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+            const timeString = `${formattedHours}:${formattedMinutes} ${ampm}`;
+
+            // Set message content
+            messageElement.innerHTML = `
+                        <div class="message-content">
+                            ${message}
+                        </div>
+                        <div class="message-time">Just now</div>
+                    `;
+
+            // Add message to chat
+            messagesContainer.appendChild(messageElement);
+
+            // Clear input
+            input.value = "";
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        });
+      });
+
+      // Input key press event for sending message
+      document.querySelectorAll(".input-container input").forEach((input) => {
+        input.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            const sendBtn =
+              this.closest(".input-container").querySelector(".send-btn");
+            sendBtn.click();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

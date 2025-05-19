@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Balloon Pop Game | NeuroQuest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      .game-container {
+        padding: 30px 0;
+        text-align: center;
+      }
+
+      .game-title {
+        margin-bottom: 20px;
+        color: #343a40;
+      }
+
+      .game-description {
+        max-width: 800px;
+        margin: 0 auto 30px;
+        color: #6c757d;
+        line-height: 1.6;
+      }
+
+      .canvas-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      #gameCanvas {
+        border: 2px solid #4c6ef5;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      #timer {
+        font-size: 1.5rem;
+        color: #ff6b6b;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .game-instructions {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        text-align: left;
+      }
+
+      .game-instructions h3 {
+        color: #343a40;
+        margin-bottom: 15px;
+      }
+
+      .game-instructions p,
+      .game-instructions li {
+        color: #6c757d;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      .back-button {
+        display: inline-block;
+        padding: 12px 20px;
+        background-color: #4c6ef5;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        margin-top: 20px;
+      }
+
+      .back-button:hover {
+        background-color: #3b5bdb;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(76, 110, 245, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Game Container -->
+    <section class="game-container container">
+      <h1 class="game-title">Balloon Pop Game</h1>
+      <p class="game-description">
+        Use your index finger to pop the balloons as they rise up the screen.
+        This exercise helps improve precision, targeting, and finger dexterity.
+      </p>
+
+      <h2 id="timer">⏱️ Time Left: 60s</h2>
+
+      <div class="canvas-wrapper">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+      </div>
+
+      <div class="game-instructions">
+        <h3>How to Play:</h3>
+        <p>1. Allow camera access when prompted to enable hand tracking</p>
+        <p>
+          2. Raise your hand in front of the camera with your index finger
+          extended
+        </p>
+        <p>3. Move your index finger to touch the balloons and pop them</p>
+        <p>
+          4. Try to pop as many balloons as possible before the timer runs out
+        </p>
+        <p>
+          <strong>Note:</strong> Make sure you're in a well-lit area for the
+          best hand tracking experience.
+        </p>
+      </div>
+
+      <a href="/my-exercises" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Exercises
+      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <p class="footer-text">&copy; 2023 NeuroQuest. All Rights Reserved.</p>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <!-- Load TensorFlow and Handpose -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+
+    <!-- Your JS files -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/balloon-game.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

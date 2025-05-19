@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leg Tapper Game</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+    }
+
+    #background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('static/images/leg.jpg'); /* Replace with your image path */
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+      transition: filter 0.5s ease;
+    }
+
+    #background.blurred {
+      filter: blur(8px);
+    }
+
+    #canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #video {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 320px;
+      height: 240px;
+      object-fit: cover;
+      border: 2px solid white;
+      border-radius: 8px;
+      z-index: 2;
+    }
+
+    #scoreboard, #timer {
+      position: absolute;
+      top: 20px;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 2;
+    }
+
+    #scoreboard {
+      left: 20px;
+    }
+
+    #timer {
+      right: 200px;
+    }
+
+    #gameOver {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 50px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      font-size: 48px;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+
+    #gameOver p {
+      font-size: 32px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="background"></div>
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="canvas"></canvas>
+  <div id="scoreboard">Score: 0</div>
+  <div id="timer">Time: 30</div>
+  <div id="gameOver">
+    <p>Game Over</p>
+    <p id="finalScore">Score: 0</p>
+    <p id="finalTime">Time: 0</p>
+  </div>
+
+  <!-- TensorFlow & Pose Detection Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreboard = document.getElementById('scoreboard');
+    const timerDisplay = document.getElementById('timer');
+    const gameOverDisplay = document.getElementById('gameOver');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const finalTimeDisplay = document.getElementById('finalTime');
+    const background = document.getElementById('background');
+
+    let detector;
+    let score = 0;
+    let timeLeft = 30;
+    let balloons = [];
+    let animationFrameId;
+    let timerInterval;
+    let gameRunning = true;
+
+    const balloonSpeed = 7;
+
+    async function setupCamera() {
+        speak(
+      "Try to engage your whole body and hit the balls with your legs, make sure to stay balanced. All the best!!"
+    );
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1280, height: 720 },
+        audio: false
+      });
+      video.srcObject = stream;
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => resolve(video);
+      });
+    }
+    function speak(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.75; // Adjust the rate of speech (1 is normal speed)
+    utterance.pitch = 1; // Adjust the pitch (1 is normal pitch)
+    speechSynthesis.speak(utterance);
+  }
+    async function init() {
+      await tf.setBackend('webgl');
+      await setupCamera();
+      detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, {
+        modelType: 'SinglePose.Lightning',
+      });
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      spawnBalloon();
+      startTimer();
+      animationFrameId = requestAnimationFrame(detectPose);
+    }
+
+    function spawnBalloon() {
+       const dynamicSpeed = balloonSpeed + Math.floor(score/5)
+      setInterval(() => {
+        if (gameRunning) {
+          balloons.push({
+            x: Math.random() * (canvas.width - 100) + 50,
+            y: Math.random() * (canvas.height / 2) + 50,
+            radius: 40,
+            speedX: (Math.random() > 0.5 ? 1 : -1) * dynamicSpeed,
+            speedY: (Math.random() > 0.5 ? 1 : -1) * dynamicSpeed,
+            popped: false
+          });
+        }
+      }, 3000);
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = `Time: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      clearInterval(timerInterval);
+      cancelAnimationFrame(animationFrameId);
+      stopCamera();
+
+      finalScoreDisplay.textContent = `Score: ${score}`;
+      finalTimeDisplay.textContent = `Time: ${30 - timeLeft}`;
+      gameOverDisplay.style.display = 'block';
+      background.classList.add('blurred');
+      speak("Good Score!! Keep going")
+    }
+
+    function stopCamera() {
+      const stream = video.srcObject;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    }
+
+    function drawBalloon(balloon) {
+      if (!balloon.popped) {
+        ctx.beginPath();
+        ctx.arc(balloon.x, balloon.y, balloon.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
+
+    function drawSkeleton(keypoints) {
+      const scaleX = canvas.width / video.videoWidth;
+      const scaleY = canvas.height / video.videoHeight;
+
+      ctx.lineWidth = 6;
+       ctx.strokeStyle = 'black'; // Use a bright color for the lines
+  ctx.shadowColor = 'black'; // Add a glow effect
+  ctx.shadowBlur = 10;
+      // Draw points
+      keypoints.forEach(kp => {
+        if (kp.score > 0.5) {
+          ctx.beginPath();
+          ctx.arc(kp.x * scaleX, kp.y * scaleY, 6, 0, 2 * Math.PI);
+          ctx.fillStyle = 'black';
+          ctx.fill();
+        }
+      });
+
+      // Draw lines (based on MoveNet skeleton)
+      const edges = [
+        ['left_shoulder', 'right_shoulder'],
+        ['left_shoulder', 'left_elbow'],
+        ['left_elbow', 'left_wrist'],
+        ['right_shoulder', 'right_elbow'],
+        ['right_elbow', 'right_wrist'],
+        ['left_shoulder', 'left_hip'],
+        ['right_shoulder', 'right_hip'],
+        ['left_hip', 'right_hip'],
+        ['left_hip', 'left_knee'],
+        ['left_knee', 'left_ankle'],
+        ['right_hip', 'right_knee'],
+        ['right_knee', 'right_ankle']
+      ];
+
+      edges.forEach(([a, b]) => {
+        const kp1 = keypoints.find(k => k.name === a);
+        const kp2 = keypoints.find(k => k.name === b);
+        if (kp1 && kp2 && kp1.score > 0.5 && kp2.score > 0.5) {
+          ctx.beginPath();
+          ctx.moveTo(kp1.x * scaleX, kp1.y * scaleY);
+          ctx.lineTo(kp2.x * scaleX, kp2.y * scaleY);
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      });
+      ctx.shadowBlur = 0;
+    }
+
+    function detectCollision(x, y, balloon) {
+      const dx = x - balloon.x;
+      const dy = y - balloon.y;
+      return Math.sqrt(dx * dx + dy * dy) < balloon.radius + 15;
+    }
+
+    async function detectPose() {
+      if (!gameRunning) return;
+
+      const poses = await detector.estimatePoses(video);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      balloons.forEach(drawBalloon);
+
+      if (poses.length > 0) {
+        const keypoints = poses[0].keypoints;
+        drawSkeleton(keypoints);
+        const canvasHeight = canvas.height;
+
+  const nose = keypoints.find(k => k.name === 'nose');
+  const leftHip = keypoints.find(k => k.name === 'left_hip');
+  const rightHip = keypoints.find(k => k.name === 'right_hip');
+
+  if (
+    nose?.score > 0.5 &&
+    leftHip?.score > 0.5 &&
+    rightHip?.score > 0.5
+  ) {
+    const avgHipY = (leftHip.y + rightHip.y) / 2;
+
+    // === FALL DETECTION ===
+    const isHeadNearGround = nose.y > canvasHeight - 150;
+    const isHipsNearGround = avgHipY > canvasHeight - 150;
+
+    if (isHeadNearGround && isHipsNearGround) {
+      alert("Fall detected! You seem to be lying on the ground.");
+      endGame();
+      return;
+    }
+  }
+
+        const scaleX = canvas.width / video.videoWidth;
+        const scaleY = canvas.height / video.videoHeight;
+
+        ['left_knee', 'right_knee'].forEach(name => {
+          const kp = keypoints.find(k => k.name === name);
+          if (kp && kp.score > 0.5) {
+            const x = kp.x * scaleX;
+            const y = kp.y * scaleY;
+            balloons.forEach(balloon => {
+              if (!balloon.popped && detectCollision(x, y, balloon)) {
+                balloon.popped = true;
+                score++;
+                speak("Hurray!!")
+                scoreboard.textContent = `Score: ${score}`;
+              }
+            });
+          }
+        });
+      }
+
+      balloons.forEach(balloon => {
+        if (!balloon.popped) {
+          balloon.x += balloon.speedX;
+          balloon.y += balloon.speedY;
+
+          if (balloon.x < balloon.radius || balloon.x > canvas.width - balloon.radius) balloon.speedX *= -1;
+          if (balloon.y < balloon.radius || balloon.y > canvas.height - balloon.radius) balloon.speedY *= -1;
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(detectPose);
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctor Dashboard | Gamified Rehab</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <section class="dashboard">
+      <div class="container">
+        <div class="dashboard-header">
+          <h1 class="dashboard-welcome">Welcome, Dr. Smith</h1>
+          <div class="dashboard-actions">
+            <a href="/profile" class="btn btn-outline">
+              <i class="fas fa-user-md"></i> My Profile
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="row">
+          <div class="col col-md-4 col-sm-12">
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Total Patients</h3>
+                <div class="dashboard-card-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+              </div>
+              <div class="dashboard-card-value patients-count">0</div>
+              <div class="dashboard-card-description">
+                Patients under your care
+              </div>
+            </div>
+          </div>
+          <div class="col col-md-4 col-sm-12">
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Active Today</h3>
+                <div class="dashboard-card-icon">
+                  <i class="fas fa-heartbeat"></i>
+                </div>
+              </div>
+              <div class="dashboard-card-value active-today">0</div>
+              <div class="dashboard-card-description">
+                Patients who completed sessions today
+              </div>
+            </div>
+          </div>
+          <div class="col col-md-4 col-sm-12">
+            <div class="dashboard-card">
+              <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">Avg. Improvement</h3>
+                <div class="dashboard-card-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+              </div>
+              <div class="dashboard-card-value avg-improvement">0%</div>
+              <div class="dashboard-card-description">
+                Average improvement across all patients
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Patient List -->
+        <div class="row">
+          <div class="col col-12">
+            <div class="dashboard-card">
+              <h3>Your Patients</h3>
+              <div class="patient-list">
+                <!-- Patient list will be populated dynamically via JavaScript -->
+                <div class="empty-state">
+                  <i class="fas fa-user-injured"></i>
+                  <p>No patients registered yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recently Active Patients -->
+        <div class="row">
+          <div class="col col-12">
+            <div class="dashboard-card">
+              <h3>Recently Active Patients</h3>
+              <div class="chart-container">
+                <canvas id="activity-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

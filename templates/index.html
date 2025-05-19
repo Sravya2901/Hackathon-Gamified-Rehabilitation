@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gamified Rehab | For Better Recovery</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <li><a href="/login">Login</a></li>
+          <li><a href="/signup">Sign Up</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Header / Hero Section -->
+    <header class="header">
+      <div class="container header-content">
+        <h1 class="header-title">Gamified Rehab for Better Recovery</h1>
+        <h2 class="header-subtitle">Engage. Recover. Progress.</h2>
+        <div class="header-buttons">
+          <a href="/login" class="btn btn-primary">Log In</a>
+          <a href="/signup" class="btn btn-outline">Sign Up</a>
+        </div>
+
+        <!-- Game Animation Preview (SVG for lightweight loading) -->
+        <div class="game-preview">
+          <svg
+            width="600"
+            height="400"
+            viewBox="0 0 600 400"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <!-- Background -->
+            <rect
+              x="50"
+              y="50"
+              width="500"
+              height="300"
+              rx="10"
+              fill="#f8f9fa"
+              stroke="#dee2e6"
+              stroke-width="2"
+            />
+
+            <!-- Hand Outline -->
+            <path
+              d="M300,250 C280,220 270,200 270,180 C270,165 280,155 290,155 C300,155 305,165 305,175 M305,175 C305,160 315,150 325,150 C335,150 340,160 340,170 M340,170 C340,155 350,145 360,145 C370,145 375,155 375,165 M375,165 C375,150 385,140 395,140 C410,140 415,155 415,170 C415,200 390,240 350,280 L300,250"
+              fill="#4C6EF5"
+              opacity="0.7"
+            />
+
+            <!-- Target Game Element -->
+            <circle id="target" cx="200" cy="150" r="20" fill="#FA5252" />
+
+            <!-- Score Display -->
+            <rect
+              x="450"
+              y="70"
+              width="80"
+              height="30"
+              rx="5"
+              fill="white"
+              stroke="#dee2e6"
+            />
+            <text
+              x="490"
+              y="90"
+              font-family="Arial"
+              font-size="14"
+              fill="#343a40"
+              text-anchor="middle"
+            >
+              Score: 125
+            </text>
+
+            <!-- Lives Display -->
+            <rect
+              x="70"
+              y="70"
+              width="80"
+              height="30"
+              rx="5"
+              fill="white"
+              stroke="#dee2e6"
+            />
+            <text
+              x="110"
+              y="90"
+              font-family="Arial"
+              font-size="14"
+              fill="#343a40"
+              text-anchor="middle"
+            >
+              Lives: 3
+            </text>
+
+            <!-- Animation for target -->
+            <animate
+              xlink:href="#target"
+              attributeName="cx"
+              from="200"
+              to="400"
+              dur="2s"
+              repeatCount="indefinite"
+              begin="0s"
+              fill="freeze"
+            />
+            <animate
+              xlink:href="#target"
+              attributeName="cy"
+              from="150"
+              to="250"
+              dur="2.5s"
+              repeatCount="indefinite"
+              begin="0s"
+              fill="freeze"
+            />
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="row">
+          <div class="col col-md-6 col-sm-12">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-gamepad"></i>
+              </div>
+              <h3>Play Interactive Games</h3>
+              <p>
+                Engage in fun, interactive hand-tracking games designed to
+                improve motor skills and coordination.
+              </p>
+            </div>
+          </div>
+          <div class="col col-md-6 col-sm-12">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h3>Track Your Progress</h3>
+              <p>
+                Monitor improvements with detailed analytics and progress charts
+                to visualize your recovery journey.
+              </p>
+            </div>
+          </div>
+          <div class="col col-md-6 col-sm-12">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-user-md"></i>
+              </div>
+              <h3>Professional Guidance</h3>
+              <p>
+                Stay connected with healthcare professionals who can monitor
+                your progress and provide personalized feedback.
+              </p>
+            </div>
+          </div>
+          <div class="col col-md-6 col-sm-12">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <h3>Achieve Milestones</h3>
+              <p>
+                Earn achievements and rewards as you reach rehabilitation
+                milestones, keeping you motivated throughout your journey.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+      <div class="container">
+        <h2 class="section-title">Success Stories</h2>
+        <div class="row">
+          <div class="col col-md-4 col-sm-12">
+            <div class="testimonial-card">
+              <div class="testimonial-text">
+                <p>
+                  "The gamified approach made my rehabilitation enjoyable rather
+                  than a chore. I looked forward to my daily exercises!"
+                </p>
+              </div>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">M</div>
+                <div class="testimonial-info">
+                  <h4>Michael R.</h4>
+                  <p>Wrist Injury Recovery</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col col-md-4 col-sm-12">
+            <div class="testimonial-card">
+              <div class="testimonial-text">
+                <p>
+                  "As a physician, I can closely monitor my patients' progress
+                  and adjust their therapy accordingly. The data is invaluable."
+                </p>
+              </div>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">D</div>
+                <div class="testimonial-info">
+                  <h4>Dr. Sarah J.</h4>
+                  <p>Rehabilitation Specialist</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col col-md-4 col-sm-12">
+            <div class="testimonial-card">
+              <div class="testimonial-text">
+                <p>
+                  "My child was resistant to traditional therapy, but the game
+                  format changed everything. His recovery accelerated
+                  dramatically."
+                </p>
+              </div>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">L</div>
+                <div class="testimonial-info">
+                  <h4>Lisa T.</h4>
+                  <p>Parent of Stroke Recovery Patient</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+      <div class="container">
+        <h2>Ready to Transform Your Rehabilitation Experience?</h2>
+        <p>
+          Join thousands of patients who have improved their recovery outcomes
+          through our gamified approach.
+        </p>
+        <div class="cta-buttons">
+          <a href="/signup" class="btn btn-primary">Get Started Now</a>
+          <a href="/login" class="btn btn-outline">Log In</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

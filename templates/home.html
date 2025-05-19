@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home | NeuroQuest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      .hero-section {
+        background: linear-gradient(135deg, #4c6ef5 0%, #3b5bdb 100%);
+        color: white;
+        padding: 80px 0;
+        margin-bottom: 60px;
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .hero-title {
+        font-size: 2.8rem;
+        margin-bottom: 20px;
+      }
+
+      .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 30px;
+        font-weight: 300;
+      }
+
+      .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .hero-btn {
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+      }
+
+      .hero-btn-primary {
+        background-color: white;
+        color: #4c6ef5;
+      }
+
+      .hero-btn-primary:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .hero-btn-secondary {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 2px solid white;
+      }
+
+      .hero-btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .info-section {
+        padding: 60px 0;
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.2rem;
+        color: #343a40;
+      }
+
+      .info-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+      }
+
+      .info-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      .info-card-icon {
+        font-size: 40px;
+        margin-bottom: 20px;
+        color: #4c6ef5;
+      }
+
+      .info-card-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        color: #343a40;
+      }
+
+      .info-card-text {
+        color: #6c757d;
+        line-height: 1.7;
+      }
+
+      .benefits-section {
+        background-color: #f8f9fa;
+        padding: 80px 0;
+      }
+
+      .benefit-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .benefit-icon {
+        font-size: 30px;
+        min-width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-right: 20px;
+        background: rgba(76, 110, 245, 0.1);
+        color: #4c6ef5;
+      }
+
+      .benefit-content h3 {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+        color: #343a40;
+      }
+
+      .benefit-content p {
+        color: #6c757d;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .cta-section {
+        text-align: center;
+        padding: 80px 0;
+      }
+
+      .cta-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        color: #343a40;
+      }
+
+      .cta-text {
+        max-width: 700px;
+        margin: 0 auto 30px;
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.7;
+      }
+
+      .cta-btn {
+        display: inline-block;
+        padding: 15px 40px;
+        background-color: #4c6ef5;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+        font-size: 1.1rem;
+        box-shadow: 0 5px 15px rgba(76, 110, 245, 0.3);
+      }
+
+      .cta-btn:hover {
+        background-color: #3b5bdb;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(76, 110, 245, 0.4);
+      }
+
+      .emoji-icon {
+        font-size: 40px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">Welcome to NeuroQuest</h1>
+          <p class="hero-subtitle">
+            The gamified rehabilitation platform that makes hand therapy fun,
+            engaging, and effective.
+          </p>
+          <div class="hero-buttons">
+            <a href="/my-exercises" class="hero-btn hero-btn-primary"
+              >Start Exercising</a
+            >
+            <!-- <a href="#how-it-works" class="hero-btn hero-btn-secondary">Learn More</a>-->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it Works Section -->
+    <section id="how-it-works" class="info-section">
+      <div class="container">
+        <h2 class="section-title">How It Works 🎮</h2>
+
+        <div class="info-cards">
+          <div class="info-card">
+            <div class="emoji-icon">🎯</div>
+            <h3 class="info-card-title">Goal-Oriented Therapy</h3>
+            <p class="info-card-text">
+              NeuroQuest transforms traditional exercises into engaging games
+              with clear goals and achievements, making rehabilitation more
+              enjoyable and encouraging consistent practice.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="emoji-icon">📊</div>
+            <h3 class="info-card-title">Progress Tracking</h3>
+            <p class="info-card-text">
+              Our platform automatically tracks your performance metrics like
+              reaction time, precision, and range of motion, providing valuable
+              data to both you and your therapist.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="emoji-icon">🎮</div>
+            <h3 class="info-card-title">Game-Based Exercises</h3>
+            <p class="info-card-text">
+              Engage in specially designed games like Fruit Ninja that are
+              calibrated to target specific motor skills and rehabilitation
+              goals while keeping you entertained.
+            </p>
+          </div>
+        </div>
+
+        <div class="info-cards">
+          <div class="info-card">
+            <div class="emoji-icon">👩‍⚕️</div>
+            <h3 class="info-card-title">Therapist Oversight</h3>
+            <p class="info-card-text">
+              Your therapist can monitor your progress, adjust difficulty
+              levels, and provide personalized feedback to ensure your
+              rehabilitation is on the right track.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="emoji-icon">📱</div>
+            <h3 class="info-card-title">Accessible Anywhere</h3>
+            <p class="info-card-text">
+              Practice your therapy exercises from the comfort of your home or
+              anywhere with an internet connection and a webcam-enabled device.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <div class="emoji-icon">🏆</div>
+            <h3 class="info-card-title">Achievement System</h3>
+            <p class="info-card-text">
+              Earn badges, unlock new games, and track achievements as you
+              progress through your rehabilitation journey, keeping you
+              motivated and engaged.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section">
+      <div class="container">
+        <h2 class="section-title">Benefits of Hand Therapy ✨</h2>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">
+            <i class="fas fa-hand-holding-medical"></i>
+          </div>
+          <div class="benefit-content">
+            <h3>Improved Hand Function</h3>
+            <p>
+              Regular hand therapy exercises help restore strength, dexterity,
+              and range of motion, allowing you to perform daily activities with
+              greater ease and independence.
+            </p>
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <div class="benefit-content">
+            <h3>Enhanced Neuroplasticity</h3>
+            <p>
+              Engaging in repetitive, targeted exercises promotes
+              neuroplasticity—your brain's ability to form new neural
+              connections and pathways, which is essential for recovery from
+              injury or neurological conditions.
+            </p>
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <div class="benefit-content">
+            <h3>Reduced Pain and Inflammation</h3>
+            <p>
+              Properly executed hand therapy can decrease pain, reduce
+              inflammation, and prevent further joint degeneration in conditions
+              like arthritis or after surgery.
+            </p>
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">
+            <i class="fas fa-hand-sparkles"></i>
+          </div>
+          <div class="benefit-content">
+            <h3>Improved Coordination and Fine Motor Skills</h3>
+            <p>
+              Regular practice of precision movements enhances hand-eye
+              coordination and fine motor skills, which are essential for tasks
+              like writing, typing, or playing musical instruments.
+            </p>
+          </div>
+        </div>
+
+        <div class="benefit-item">
+          <div class="benefit-icon">
+            <i class="fas fa-smile-beam"></i>
+          </div>
+          <div class="benefit-content">
+            <h3>Better Quality of Life</h3>
+            <p>
+              Regaining hand function translates to greater independence,
+              confidence, and overall quality of life as you're able to return
+              to activities you enjoy and daily tasks you need to perform.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <h2 class="cta-title">Ready to Start Your Rehabilitation Journey?</h2>
+        <p class="cta-text">
+          Begin your gamified rehabilitation experience today and take a fun,
+          engaging approach to your hand therapy. Our platform makes it easy to
+          stay consistent with your exercises while tracking your progress along
+          the way.
+        </p>
+        <a href="/my-exercises" class="cta-btn">Start Your Exercises</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

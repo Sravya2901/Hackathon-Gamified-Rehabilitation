@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Body-Controlled Car Game</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #222;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      height: 100%;
+      width: 100%;
+    }
+
+    canvas {
+      display: block;
+      /* position: absolute; */
+      top: 0;
+      left: 0;
+    }
+
+    #timer {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      z-index: 2;
+    }
+
+    #topRightUI {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      /* max-width: 100vw; /* Ensures it doesn't overflow horizontally */
+      /* max-height: 100vh; Ensures it fits within screen height */ 
+      padding: 5px;
+      box-sizing: border-box;
+    }
+
+    #poseCanvas {
+      width: 480px;
+      height: 320px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      background-color: #000;
+    }
+
+    #score {
+      margin-top: 10px;
+      font-size: 24px;
+      color: #fff;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div id="timer">⏱️ Time Left: 20s</div>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Pose UI on top-right -->
+  <div id="topRightUI">
+    <canvas id="poseCanvas"></canvas>
+    <div id="score">Score: 0</div>
+  </div>
+
+  <!-- TensorFlow and pose detection scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5/0.12.2/ml5.min.js"></script>
+  <div id="feedback" style="position: absolute; top: 100px; width: 100%; text-align: center; font-size: 100px; color: white; font-weight: bold;"></div>
+  <!-- Your custom game logic -->
+  <script src="{{ url_for('static', filename='js/car-game.js') }}"></script>
+</body>
+</html>

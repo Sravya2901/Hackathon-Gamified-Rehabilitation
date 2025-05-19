@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vertical Volleyball Pose Game</title>
+    <style>
+       #topRightUI {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      /* max-width: 100vw; /* Ensures it doesn't overflow horizontally */
+      /* max-height: 100vh; Ensures it fits within screen height */ 
+      padding: 5px;
+      box-sizing: border-box;
+    }
+      body {
+        margin: 0;
+        background: #222;
+        color: #fff;
+        font-family: Arial;
+        text-align: center;
+      }
+      canvas {
+        background: #111;
+        display: block;
+        margin: 20px auto;
+      }
+      #info {
+        font-size: 20px;
+        margin-top: 10px;
+      }
+      #poseCanvas {
+      width: 480px;
+      height: 320px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      background-color: #000;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="info">Score: 0 | Time Left: 10s | Lives: 3</div>
+    <canvas id="volleyCanvas" width="528" height="704"></canvas>
+    <div id="topRightUI">
+    <canvas id="poseCanvas"></canvas>
+  </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script>
+      window.onload = async () => {
+        const canvas = document.getElementById("volleyCanvas");
+        const ctx = canvas.getContext("2d");
+        const poseCanvas = document.getElementById("poseCanvas");
+        const poseCtx = poseCanvas.getContext("2d");
+        let video, detector;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height - 100;
+        let direction = -1; // -1 = up, 1 = down
+        let ballMoving = false;
+        let score = 0;
+        let timeLeft = 10;
+        let lives = 3; // Initialize number of lives
+        let gameOver = false;
+        let isDisplayingLifeLost = false; // Flag for showing "Life Lost" message
+
+        const backgroundImg = new Image();
+        backgroundImg.src = "static/assets/volleycourt.jpg";
+
+        const ballImg = new Image();
+        ballImg.src = "static/assets/ball.png";
+
+        const playerImg = new Image();
+        playerImg.src = "static/assets/player.png";
+
+        function speak(text) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 0.75; // Adjust the rate of speech (1 is normal speed)
+          utterance.pitch = 1; // Adjust the pitch (1 is normal pitch)
+          speechSynthesis.speak(utterance);
+        }
+        async function setupCamera() {
+        speak("Raise your arms in front of the camera and extend your shoulders to hit the ball. All the Best!")
+          video = document.createElement("video");
+          video.width = canvas.width;
+          video.height = canvas.height;
+          video.autoplay = true;
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+          });
+          video.srcObject = stream;
+          return new Promise((resolve) => {
+            video.onloadeddata = () => resolve(video);
+          });
+        }
+
+        function drawBackground() {
+          if (backgroundImg.complete) {
+            ctx.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+          }
+        }
+
+        function drawBall() {
+          if (ballImg.complete) {
+            ctx.drawImage(ballImg, ballX - 20, ballY - 20, 60, 60);
+          }
+        }
+
+        function drawPlayers() {
+          if (direction === -1 && playerImg.complete) {
+            ctx.drawImage(playerImg, canvas.width / 2 - 30, 20, 80, 80); // top player
+          }
+          if (direction === 1 && playerImg.complete) {
+            ctx.drawImage(
+              playerImg,
+              canvas.width / 2 - 30,
+              canvas.height - 80,
+              80,
+              80
+            ); // bottom player
+          }
+        }
+
+        function updateBall() {
+          if (!ballMoving) return;
+          ballY += 5 * direction;
+
+          if (direction === -1 && ballY <= 80) {
+            direction = 1;
+            ballMoving = false;
+            score++;
+          } else if (direction === 1 && ballY >= canvas.height - 80) {
+            direction = -1;
+            ballMoving = false;
+            score++;
+          }
+        }
+
+        function detectHandsAboveHead(pose) {
+          const keypoints = pose.keypoints;
+          const leftWrist = keypoints.find((p) => p.name === "left_wrist");
+          const rightWrist = keypoints.find((p) => p.name === "right_wrist");
+          const nose = keypoints.find((p) => p.name === "nose");
+
+          return (
+            leftWrist &&
+            rightWrist &&
+            nose &&
+            leftWrist.y < nose.y &&
+            rightWrist.y < nose.y
+          );
+        }
+
+        async function runPoseDetection() {
+          const poses = await detector.estimatePoses(video);
+          if (
+            poses.length > 0 &&
+            detectHandsAboveHead(poses[0]) &&
+            !ballMoving
+          ) {
+            ballMoving = true;
+            timeLeft = 10; // Reset timer when ball is hit
+          }
+
+          if (!gameOver && !isDisplayingLifeLost) {
+            updateBall();
+            drawFrame();
+            requestAnimationFrame(runPoseDetection);
+          }
+        }
+
+        function drawFrame() {
+          ctx.save();
+          ctx.scale(-1, 1); // Flip video horizontally for mirror effect
+          ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+          ctx.restore();
+
+          ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          drawBackground();
+          drawBall();
+          drawPlayers();
+
+          document.getElementById(
+            "info"
+          ).textContent = `Score: ${score} | Time Left: ${timeLeft}s | Lives: ${lives}`;
+        }
+async function drawPoseCanvas() {
+  poseCtx.save();
+  poseCtx.scale(-1, 1); // Flip horizontally for mirror effect
+  poseCtx.drawImage(video, -poseCanvas.width, 0, poseCanvas.width, poseCanvas.height);
+  poseCtx.restore();
+
+  if (!detector) {
+    requestAnimationFrame(drawPoseCanvas);
+    return;
+  }
+
+  // Get pose(s) for this frame
+  const poses = await detector.estimatePoses(video);
+
+  if (poses.length > 0) {
+    const keypoints = poses[0].keypoints;
+
+    // List of arm keypoint names to highlight
+    const armKeypoints = [
+      "left_shoulder",
+      "left_elbow",
+      "left_wrist",
+      "right_shoulder",
+      "right_elbow",
+      "right_wrist",
+    ];
+
+    poseCtx.fillStyle = "red";
+    for (const name of armKeypoints) {
+      const kp = keypoints.find((k) => k.name === name);
+      if (kp && kp.score > 0.4) {
+        // Scale coordinates to match poseCanvas dimensions
+        const scaleX = poseCanvas.width / video.videoWidth;
+        const scaleY = poseCanvas.height / video.videoHeight;
+
+        // Flip x-coordinate due to horizontal mirroring
+        const x = poseCanvas.width - kp.x * scaleX;
+        const y = kp.y * scaleY;
+
+        // Draw the keypoint
+        poseCtx.beginPath();
+        poseCtx.arc(x, y, 6, 0, 2 * Math.PI);
+        poseCtx.fill();
+      }
+    }
+  }
+
+  // Recursively draw poseCanvas
+  requestAnimationFrame(drawPoseCanvas);
+}
+
+        function displayLifeLostMessage(lives) {
+          isDisplayingLifeLost = true;
+
+          // Display "Life Lost" message
+          ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "white";
+          ctx.font = "bold 48px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("Life Lost!", canvas.width / 2, canvas.height / 2);
+          ctx.font = "bold 36px Arial";
+          ctx.fillText(
+            `Remaining Lives: ${lives}`,
+            canvas.width / 2,
+            canvas.height / 2 + 30
+          );
+          if (lives === 2) {
+            speak("Don't give up! You can still win!"); // Encouragement message
+          }
+          if (lives === 1) {
+            speak("Try to raise your arms as high as you can"); // Encouragement message
+          }
+          setTimeout(() => {
+            isDisplayingLifeLost = false;
+            if (lives > 0) {
+              timeLeft = 10; // Reset the timer for the next round
+              startCountdown(); // Restart the countdown
+              runPoseDetection(); // Resume pose detection
+            }
+          }, 2000); // Show message for 2 seconds
+        }
+
+        function startCountdown() {
+          const interval = setInterval(() => {
+            if (timeLeft > 0 && !gameOver) {
+              timeLeft--;
+            } else if (timeLeft === 0 && !gameOver) {
+              lives--; // Deduct one life when timer reaches 0
+              clearInterval(interval); // Stop the timer
+              if (lives > 0) {
+                displayLifeLostMessage(lives); // Show "Life Lost" message if lives remain
+              } else {
+                gameOver = true;
+                endGame();
+              }
+            }
+          }, 1000);
+        }
+
+        function endGame() {
+          speak("No worries, Try harder next time."); // Encouragement message
+          ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "white";
+          ctx.font = "bold 48px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("Game Over!", canvas.width / 2, canvas.height / 2 - 20);
+          ctx.font = "bold 36px Arial";
+          ctx.fillText(
+            `Final Score: ${score}`,
+            canvas.width / 2,
+            canvas.height / 2 + 30
+          );
+        }
+
+        async function startGame() {
+          await setupCamera();
+          detector = await poseDetection.createDetector(
+            poseDetection.SupportedModels.MoveNet
+          );
+          runPoseDetection();
+          drawPoseCanvas();
+          startCountdown();
+        }
+
+        startGame();
+      };
+    </script>
+  </body>
+</html>

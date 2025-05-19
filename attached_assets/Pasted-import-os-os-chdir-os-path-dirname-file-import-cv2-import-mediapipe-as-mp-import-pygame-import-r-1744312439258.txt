@@ -1,0 +1,181 @@
+import os
+os.chdir(os.path.dirname(_file_))
+import cv2
+import mediapipe as mp
+import pygame
+import random
+import math
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Initialize Pygame
+pygame.init()
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Fruit Ninja - Webcam Background Mode")
+clock = pygame.time.Clock()
+
+# Load images
+fruit_images = {
+    "apple": pygame.image.load("apple.png"),
+    "banana": pygame.image.load("banana.png"),
+    "pineapple": pygame.image.load("pineapple.png"),
+    "bomb": pygame.image.load("bomb.png")
+}
+
+# Load sliced images
+sliced_images = {
+    "apple": (pygame.image.load("apple_half1.png"), pygame.image.load("apple_half2.png")),
+    "banana": (pygame.image.load("banana_half1.png"), pygame.image.load("banana_half2.png")),
+    "pineapple": (pygame.image.load("pineapple_half1.png"), pygame.image.load("pineapple_half2.png"))
+}
+
+# Resize images
+for key in fruit_images:
+    fruit_images[key] = pygame.transform.scale(fruit_images[key], (60, 60))
+for key in sliced_images:
+    sliced_images[key] = (
+        pygame.transform.scale(sliced_images[key][0], (40, 40)),
+        pygame.transform.scale(sliced_images[key][1], (40, 40))
+    )
+
+# Fruit types with point values
+fruit_types = {
+    "apple": 1,
+    "banana": 2,
+    "pineapple": 3,
+    "bomb": -1
+}
+
+# Mediapipe setup
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.7)
+
+# Webcam setup
+cap = cv2.VideoCapture(0)
+
+# Fruit class
+class Fruit:
+    def _init_(self):
+        self.type = random.choice(list(fruit_types.keys()))
+        self.image = fruit_images[self.type]
+        self.x = random.randint(100, WIDTH - 100)
+        self.y = HEIGHT + 50
+        self.vx = random.uniform(-1.5, 1.5)
+        self.vy = random.uniform(-20, -25)
+        self.gravity = 0.5
+        self.touched = False
+        self.sliced = False
+        self.slice_time = None
+
+    def move(self):
+        self.x += self.vx
+        self.y += self.vy
+        self.vy += self.gravity
+
+    def draw(self, surface):
+        if not self.sliced:
+            surface.blit(self.image, (int(self.x), int(self.y)))
+        elif self.type in sliced_images:
+            left, right = sliced_images[self.type]
+            surface.blit(left, (int(self.x) - 25, int(self.y)))
+            surface.blit(right, (int(self.x) + 10, int(self.y)))
+
+# Collision detection
+def is_sliced(fruit, finger_x, finger_y):
+    distance = math.hypot(fruit.x - finger_x, fruit.y - finger_y)
+    return distance < 40
+
+# Game variables
+score = 0
+lives = 3
+reaction_times = []
+current_fruit = None
+spawn_time = None
+
+# Game loop
+running = True
+while running:
+    # Webcam input
+    ret, frame = cap.read()
+    if not ret:
+        break
+    frame = cv2.flip(frame, 1)
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # Resize and convert frame to Pygame surface
+    frame = cv2.resize(rgb_frame, (WIDTH, HEIGHT))
+    frame_surface = pygame.surfarray.make_surface(np.rot90(frame))
+
+    # Display webcam as background
+    screen.blit(frame_surface, (0, 0))
+
+    result = hands.process(rgb_frame)
+    finger_x, finger_y = None, None
+
+    if result.multi_hand_landmarks:
+        for hand_landmarks in result.multi_hand_landmarks:
+            lm = hand_landmarks.landmark[8]
+            finger_x = int(lm.x * WIDTH)
+            finger_y = int(lm.y * HEIGHT)
+            pygame.draw.circle(screen, (0, 255, 0), (finger_x, finger_y), 10)
+
+    # Spawn fruit if none exists
+    if current_fruit is None:
+        current_fruit = Fruit()
+        spawn_time = time.time()
+
+    # Update and draw current fruit
+    if current_fruit:
+        current_fruit.move()
+        current_fruit.draw(screen)
+
+        if finger_x and not current_fruit.touched and is_sliced(current_fruit, finger_x, finger_y):
+            current_fruit.touched = True
+            current_fruit.sliced = True
+            current_fruit.slice_time = time.time()
+
+            reaction_time = current_fruit.slice_time - spawn_time
+            if current_fruit.type != "bomb":
+                score += fruit_types[current_fruit.type]
+                reaction_times.append((score, reaction_time))
+            else:
+                lives -= 1
+
+        if current_fruit.sliced and time.time() - current_fruit.slice_time > 0.5:
+            current_fruit = None
+        elif current_fruit.y > HEIGHT + 50:
+            current_fruit = None
+
+    # Display score and lives
+    font = pygame.font.SysFont(None, 36)
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    lives_text = font.render(f"Lives: {lives}", True, (255, 0, 0))
+    screen.blit(score_text, (10, 10))
+    screen.blit(lives_text, (10, 50))
+
+    if lives <= 0:
+        game_over = font.render("Game Over!", True, (255, 255, 0))
+        screen.blit(game_over, (WIDTH // 2 - 80, HEIGHT // 2))
+        pygame.display.update()
+        pygame.time.delay(2000)
+        break
+
+    pygame.display.update()
+    clock.tick(30)
+
+cap.release()
+pygame.quit()
+
+# Plot reaction times
+if reaction_times:
+    scores, times = zip(*reaction_times)
+    plt.figure(figsize=(8, 5))
+    plt.plot(scores, times, marker='o', linestyle='-', color='blue')
+    plt.title("Reaction Time per Fruit")
+    plt.xlabel("Fruit Count (Score)")
+    plt.ylabel("Reaction Time (seconds)")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Dashboard | NeuroQuest</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .dashboard-welcome {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+
+      .dashboard-subtitle {
+        color: #6c757d;
+        margin-bottom: 20px;
+      }
+
+      .dashboard-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .stat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .stat-card-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .stat-card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+      }
+
+      .icon-blue {
+        background-color: #4c6ef5;
+      }
+
+      .icon-green {
+        background-color: #20c997;
+      }
+
+      .icon-red {
+        background-color: #ff6b6b;
+      }
+
+      .icon-purple {
+        background-color: #7950f2;
+      }
+
+      .stat-card-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .stat-trend {
+        display: flex;
+        align-items: center;
+        font-size: 0.8rem;
+      }
+
+      .trend-up {
+        color: #20c997;
+      }
+
+      .trend-down {
+        color: #ff6b6b;
+      }
+
+      .section-title {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-icon {
+        color: #4c6ef5;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .chart-title {
+        font-size: 1.1rem;
+        margin: 0;
+      }
+
+      .chart-period {
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+
+      .chart-container {
+        height: 220px;
+      }
+
+      .sessions-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .session-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f3f5;
+      }
+
+      .session-item:last-child {
+        border-bottom: none;
+      }
+
+      .session-game-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        margin-right: 15px;
+      }
+
+      .session-details {
+        flex: 1;
+      }
+
+      .session-game {
+        font-size: 1.1rem;
+        margin: 0 0 5px;
+      }
+
+      .session-date {
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+
+      .session-stats {
+        display: flex;
+        gap: 15px;
+        font-size: 0.85rem;
+      }
+
+      .session-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .session-stat-value {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .session-stat-label {
+        color: #6c757d;
+      }
+
+      .game-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .game-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+      }
+
+      .game-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .game-card-img {
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+      }
+
+      .game-card-body {
+        padding: 15px;
+      }
+
+      .game-card-title {
+        font-size: 1rem;
+        margin: 0 0 5px;
+      }
+
+      .game-card-text {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+      }
+
+      .game-card-btn {
+        display: block;
+        width: 100%;
+        padding: 8px;
+        background-color: #4c6ef5;
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .game-card-btn:hover {
+        background-color: #3b5bdb;
+      }
+
+      .weekly-progress-section {
+        margin-bottom: 30px;
+      }
+
+      .progress-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 20px;
+      }
+
+      .progress-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+
+      .progress-title {
+        font-size: 1rem;
+        margin: 0 0 5px;
+      }
+
+      .progress-subtitle {
+        font-size: 0.85rem;
+        color: #6c757d;
+      }
+
+      .progress-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #4c6ef5;
+      }
+
+      .progress-bar-container {
+        height: 8px;
+        background-color: #f1f3f5;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+
+      .progress-bar {
+        height: 100%;
+        border-radius: 10px;
+        background-color: #4c6ef5;
+      }
+
+      .progress-bar-accuracy {
+        width: 85%;
+        background-color: #20c997;
+      }
+
+      .progress-bar-motion {
+        width: 65%;
+        background-color: #7950f2;
+      }
+
+      .progress-bar-speed {
+        width: 78%;
+        background-color: #ff6b6b;
+      }
+
+      .progress-footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+      }
+
+      .progress-label {
+        color: #6c757d;
+      }
+
+      .progress-change {
+        font-weight: 600;
+      }
+
+      .progress-increase {
+        color: #20c997;
+      }
+
+      .progress-decrease {
+        color: #ff6b6b;
+      }
+
+      .goals-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .goal-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f3f5;
+        position: relative;
+      }
+
+      .goal-item:last-child {
+        border-bottom: none;
+      }
+
+      .goal-due {
+        position: absolute;
+        right: 10px;
+        font-size: 0.8rem;
+        color: #6c757d;
+      }
+
+      .goal-checkbox {
+        margin-right: 12px;
+      }
+      .hero-section {
+        background: linear-gradient(135deg, #4c6ef5 0%, #3b5bdb 100%);
+        color: white;
+        padding: 80px 0;
+        margin-bottom: 60px;
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .hero-title {
+        font-size: 2.8rem;
+        margin-bottom: 20px;
+      }
+
+      .hero-subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 30px;
+        font-weight: 300;
+      }
+
+      .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .hero-btn {
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+      }
+
+      .hero-btn-primary {
+        background-color: white;
+        color: #4c6ef5;
+      }
+
+      .hero-btn-primary:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .hero-btn-secondary {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 2px solid white;
+      }
+
+      .hero-btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .info-section {
+        padding: 60px 0;
+      }
+
+      .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+        font-size: 2.2rem;
+        color: #343a40;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">Welcome to NeuroQuest</h1>
+          <p class="hero-subtitle">
+            The gamified rehabilitation platform that makes hand therapy fun,
+            engaging, and effective.
+          </p>
+          <div class="hero-buttons">
+            <a href="/my-exercises" class="hero-btn hero-btn-primary"
+              >Start Exercising</a
+            >
+            <!-- <a href="#how-it-works" class="hero-btn hero-btn-secondary">Learn More</a>-->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <section class="dashboard">
+      <div class="container">
+        <div class="dashboard-header">
+          <div>
+            <h1 class="dashboard-welcome">
+              Hi, <span class="user-name">User</span>! 👋
+            </h1>
+            <p class="dashboard-subtitle">
+              Here's an overview of your rehabilitation progress
+            </p>
+          </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="dashboard-cards-grid">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3 class="stat-card-title">TODAY'S SCORE</h3>
+              <div class="stat-card-icon icon-blue">
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+            <div class="stat-card-value">125</div>
+            <div class="stat-trend trend-up">
+              <i class="fas fa-arrow-up"></i> 15% from last session
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3 class="stat-card-title">REACTION TIME</h3>
+              <div class="stat-card-icon icon-green">
+                <i class="fas fa-bolt"></i>
+              </div>
+            </div>
+            <div class="stat-card-value">450ms</div>
+            <div class="stat-trend trend-up">
+              <i class="fas fa-arrow-up"></i> 5% faster than average
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3 class="stat-card-title">CURRENT STREAK</h3>
+              <div class="stat-card-icon icon-red">
+                <i class="fas fa-fire"></i>
+              </div>
+            </div>
+            <div class="stat-card-value">4</div>
+            <div class="stat-trend">Days in a row</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <h3 class="stat-card-title">TOTAL SESSIONS</h3>
+              <div class="stat-card-icon icon-purple">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+            </div>
+            <div class="stat-card-value">16</div>
+            <div class="stat-trend">Since Apr 1, 2025</div>
+          </div>
+        </div>
+
+        <!-- Weekly Progress Section -->
+        <div class="weekly-progress-section">
+          <h2 class="section-title">
+            <i class="fas fa-chart-line section-icon"></i> Progress
+          </h2>
+          <div class="progress-cards">
+            <div class="progress-card">
+              <div class="progress-header">
+                <div>
+                  <h3 class="progress-title">Accuracy</h3>
+                  <p class="progress-subtitle">Target precision</p>
+                </div>
+                <div class="progress-value">85%</div>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar progress-bar-accuracy"></div>
+              </div>
+              <div class="progress-footer">
+                <span class="progress-label">Last Day</span>
+                <span class="progress-change progress-increase">+8%</span>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div class="progress-header">
+                <div>
+                  <h3 class="progress-title">Range of Motion</h3>
+                  <p class="progress-subtitle">Hand mobility</p>
+                </div>
+                <div class="progress-value">65%</div>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar progress-bar-motion"></div>
+              </div>
+              <div class="progress-footer">
+                <span class="progress-label">Last Day</span>
+                <span class="progress-change progress-increase">+5%</span>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div class="progress-header">
+                <div>
+                  <h3 class="progress-title">Speed Improvement</h3>
+                  <p class="progress-subtitle">Movement velocity</p>
+                </div>
+                <div class="progress-value">78%</div>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar progress-bar-speed"></div>
+              </div>
+              <div class="progress-footer">
+                <span class="progress-label">Last Day</span>
+                <span class="progress-change progress-increase">+12%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Therapist Assigned Goals 
+            <div class="assigned-goals-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tasks section-icon"></i> Therapist Assigned Goals
+                </h2>
+                <div class="chart-card">
+                    <ul class="goals-list">
+                        <li class="goal-item">
+                            <input type="checkbox" id="tgoal1" class="goal-checkbox">
+                            <label for="tgoal1">Complete 3 Fruit Ninja sessions this week</label>
+                            <span class="goal-due">Due: Apr 15, 2025</span>
+                        </li>
+                        <li class="goal-item">
+                            <input type="checkbox" id="tgoal2" class="goal-checkbox">
+                            <label for="tgoal2">Achieve reaction time below 400ms in at least one session</label>
+                            <span class="goal-due">Due: Apr 18, 2025</span>
+                        </li>
+                        <li class="goal-item">
+                            <input type="checkbox" id="tgoal3" class="goal-checkbox" checked>
+                            <label for="tgoal3">Maintain 70% accuracy across 5 consecutive sessions</label>
+                            <span class="goal-due">Completed: Apr 9, 2025</span>
+                        </li>
+                        <li class="goal-item">
+                            <input type="checkbox" id="tgoal4" class="goal-checkbox">
+                            <label for="tgoal4">Practice pinching exercises for 10 minutes daily</label>
+                            <span class="goal-due">Due: Apr 20, 2025</span>
+                        </li>
+                        <li class="goal-item">
+                            <input type="checkbox" id="tgoal5" class="goal-checkbox">
+                            <label for="tgoal5">Increase range of motion by 15% from baseline</label>
+                            <span class="goal-due">Due: Apr 30, 2025</span>
+                        </li>
+                    </ul>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="/my-exercises" class="btn btn-primary">Go to Exercise Games</a>
+                    </div>
+                </div>
+            </div> -->
+        <!-- Charts Section 
+        <div class="metrics-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Score Trend</h3>
+              <span class="chart-period">Last 7 sessions</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="score-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Reaction Time</h3>
+              <span class="chart-period">Last 7 sessions</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="reaction-chart"></canvas>
+            </div>
+          </div>
+        </div>-->
+
+        <!-- Additional Charts Section 
+        <div class="metrics-grid">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Range of Motion</h3>
+              <span class="chart-period">Weekly improvement</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="motion-chart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Speed Improvement</h3>
+              <span class="chart-period">Weekly comparison</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="speed-chart"></canvas>
+            </div>
+          </div>
+        </div>-->
+
+        <!-- Recent Sessions -->
+        <div class="recent-sessions-section">
+          <h2 class="section-title">
+            <i class="fas fa-history section-icon"></i> Recent Sessions
+          </h2>
+          <div class="chart-card">
+            <ul class="sessions-list">
+              <li class="session-item">
+                <div
+                  class="session-game-icon"
+                  style="background-color: #4c6ef5"
+                >
+                  🍎
+                </div>
+                <div class="session-details">
+                  <h4 class="session-game">Fruit Ninja</h4>
+                  <p class="session-date">Today, 10:45 AM</p>
+                </div>
+                <div class="session-stats">
+                  <div class="session-stat">
+                    <span class="session-stat-value">125</span>
+                    <span class="session-stat-label">Score</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">450ms</span>
+                    <span class="session-stat-label">Avg. Time</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">5m 20s</span>
+                    <span class="session-stat-label">Duration</span>
+                  </div>
+                </div>
+              </li>
+              <li class="session-item">
+                <div
+                  class="session-game-icon"
+                  style="background-color: #4c6ef5"
+                >
+                  ⚽
+                </div>
+                <div class="session-details">
+                  <h4 class="session-game">Volley Ball</h4>
+                  <p class="session-date">Yesterday, 3:20 PM</p>
+                </div>
+                <div class="session-stats">
+                  <div class="session-stat">
+                    <span class="session-stat-value">10</span>
+                    <span class="session-stat-label">Score</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">490ms</span>
+                    <span class="session-stat-label">Avg. Time</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">4m 45s</span>
+                    <span class="session-stat-label">Duration</span>
+                  </div>
+                </div>
+              </li>
+              <li class="session-item">
+                <div
+                  class="session-game-icon"
+                  style="background-color: #4c6ef5"
+                >
+
+                  ⚽
+                </div>
+                <div class="session-details">
+                  <h4 class="session-game">Car Dodger</h4>
+                  <p class="session-date">May 16th, 2025, 11:15 AM</p>
+                </div>
+                <div class="session-stats">
+                  <div class="session-stat">
+                    <span class="session-stat-value">25</span>
+                    <span class="session-stat-label">Score</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">520ms</span>
+                    <span class="session-stat-label">Avg. Time</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">4m 10s</span>
+                    <span class="session-stat-label">Duration</span>
+                  </div>
+                </div>
+              </li>
+              <li class="session-item">
+                <div
+                  class="session-game-icon"
+                  style="background-color: #4c6ef5"
+                >
+
+                  🚗
+                </div>
+                <div class="session-details">
+                  <h4 class="session-game">FootBall</h4>
+                  <p class="session-date">Apr 8, 2025, 11:15 AM</p>
+                </div>
+                <div class="session-stats">
+                  <div class="session-stat">
+                    <span class="session-stat-value">38</span>
+                    <span class="session-stat-label">Score</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">520ms</span>
+                    <span class="session-stat-label">Avg. Time</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">4m 10s</span>
+                    <span class="session-stat-label">Duration</span>
+                  </div>
+                </div>
+              </li>
+                            <li class="session-item">
+                <div
+                  class="session-game-icon"
+                  style="background-color: #4c6ef5"
+                >
+
+                  ⚽
+                </div>
+                <div class="session-details">
+                  <h4 class="session-game">Balloon Popper</h4>
+                  <p class="session-date">May 16th, 2025, 10:00 AM</p>
+                </div>
+                <div class="session-stats">
+                  <div class="session-stat">
+                    <span class="session-stat-value">40</span>
+                    <span class="session-stat-label">Score</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">320ms</span>
+                    <span class="session-stat-label">Avg. Time</span>
+                  </div>
+                  <div class="session-stat">
+                    <span class="session-stat-value">4m 10s</span>
+                    <span class="session-stat-label">Duration</span>
+                  </div>
+                </div>
+              </li>
+            </ul>
+            <div style="text-align: center; margin-top: 20px">
+              <a href="/my-exercises" class="btn btn-primary"
+                >View All Sessions</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Update username if logged in
+        const user = getCurrentUser();
+        if (user) {
+          const userName = document.querySelector(".user-name");
+          if (userName) {
+            userName.textContent = user.name || "User";
+          }
+        }
+
+        // Create score chart
+
+        // Create reaction time chart
+
+        // Create range of motion chart (radial)
+        const motionCtx = document
+          .getElementById("motion-chart")
+          .getContext("2d");
+        new Chart(motionCtx, {
+          type: "radar",
+          data: {
+            labels: [
+              "Finger Flexion",
+              "Finger Extension",
+              "Wrist Flexion",
+              "Wrist Extension",
+              "Grip Strength",
+              "Pinch Strength",
+            ],
+            datasets: [
+              {
+                label: "Last Week",
+                data: [50, 45, 55, 40, 60, 30],
+                backgroundColor: "rgba(121, 80, 242, 0.2)",
+                borderColor: "#7950f2",
+                borderWidth: 2,
+                pointBackgroundColor: "#7950f2",
+              },
+              {
+                label: "This Week",
+                data: [60, 55, 65, 55, 70, 45],
+                backgroundColor: "rgba(76, 110, 245, 0.2)",
+                borderColor: "#4C6EF5",
+                borderWidth: 2,
+                pointBackgroundColor: "#4C6EF5",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              r: {
+                angleLines: {
+                  display: true,
+                },
+                suggestedMin: 0,
+                suggestedMax: 100,
+              },
+            },
+          },
+        });
+
+        // Create speed improvement chart (bar)
+        const speedCtx = document
+          .getElementById("speed-chart")
+          .getContext("2d");
+        new Chart(speedCtx, {
+          type: "bar",
+          data: {
+            labels: [
+              "Tapping",
+              "Pinching",
+              "Grasping",
+              "Reaching",
+              "Rotating",
+              "Overall",
+            ],
+            datasets: [
+              {
+                label: "Speed Improvement (%)",
+                data: [15, 20, 10, 25, 18, 12],
+                backgroundColor: [
+                  "rgba(255, 107, 107, 0.7)",
+                  "rgba(76, 110, 245, 0.7)",
+                  "rgba(32, 201, 151, 0.7)",
+                  "rgba(255, 193, 7, 0.7)",
+                  "rgba(121, 80, 242, 0.7)",
+                  "rgba(108, 117, 125, 0.7)",
+                ],
+                borderWidth: 0,
+                borderRadius: 5,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  display: true,
+                  drawBorder: false,
+                },
+                ticks: {
+                  callback: function (value) {
+                    return value + "%";
+                  },
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

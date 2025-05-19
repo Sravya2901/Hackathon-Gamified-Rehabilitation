@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile | Gamified Rehab</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container navbar-container">
+        <a href="/" class="navbar-logo">
+          <i class="fas fa-heartbeat"></i> NeuroQuest
+        </a>
+        <button class="navbar-toggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <ul class="navbar-menu">
+          <!-- To be populated dynamically with auth.js -->
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Profile Content -->
+    <section class="dashboard">
+      <div class="container">
+        <div class="dashboard-header">
+          <h1>My Profile</h1>
+          <div class="dashboard-actions">
+            <a href="#" class="btn btn-outline logout-btn">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
+        </div>
+
+        <!-- Profile Overview -->
+        <div class="row">
+          <div class="col col-md-4 col-sm-12">
+            <div class="profile-sidebar">
+              <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <h2 id="profile-name">User Name</h2>
+              <p id="profile-email">user@example.com</p>
+              <p id="profile-role">Role: User</p>
+              <div class="profile-stats">
+                <div class="profile-stat">
+                  <div class="profile-stat-value" id="profile-sessions">0</div>
+                  <div class="profile-stat-label">Sessions</div>
+                </div>
+                <div class="profile-stat">
+                  <div class="profile-stat-value" id="profile-avg-score">0</div>
+                  <div class="profile-stat-label">Avg. Score</div>
+                </div>
+                <div class="profile-stat">
+                  <div class="profile-stat-value" id="profile-streak">0</div>
+                  <div class="profile-stat-label">Streak</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col col-md-8 col-sm-12">
+            <div class="dashboard-card">
+              <h3>Edit Profile</h3>
+              <form class="profile-form">
+                <div class="form-group">
+                  <label for="name" class="form-label">Full Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    class="form-control"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="email" class="form-label">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="role" class="form-label">Role</label>
+                  <input type="text" id="role" class="form-control" disabled />
+                </div>
+                <hr />
+                <h4>Change Password</h4>
+                <div class="form-group">
+                  <label for="current-password" class="form-label"
+                    >Current Password</label
+                  >
+                  <input
+                    type="password"
+                    id="current-password"
+                    class="form-control"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="new-password" class="form-label"
+                    >New Password</label
+                  >
+                  <input
+                    type="password"
+                    id="new-password"
+                    class="form-control"
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="confirm-new-password" class="form-label"
+                    >Confirm New Password</label
+                  >
+                  <input
+                    type="password"
+                    id="confirm-new-password"
+                    class="form-control"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  Update Profile
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="row">
+          <div class="col col-12">
+            <div class="dashboard-card">
+              <h3>Account Settings</h3>
+              <div class="settings-options">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Email Notifications</h4>
+                    <p>
+                      Receive email reminders for your daily rehabilitation
+                      exercises.
+                    </p>
+                  </div>
+                  <div class="setting-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Dark Mode</h4>
+                    <p>
+                      Switch between light and dark theme for the application.
+                    </p>
+                  </div>
+                  <div class="setting-control">
+                    <label class="toggle-switch">
+                      <input type="checkbox" />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <h4>Data Privacy</h4>
+                    <p>
+                      Manage how your rehabilitation data is stored and shared.
+                    </p>
+                  </div>
+                  <div class="setting-control">
+                    <a href="#" class="btn btn-outline btn-sm">Manage</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand Rehabilitation Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap/dist/gsap.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .left,
+      .right {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .left {
+        background-color: #f0f0f0;
+        position: relative;
+      }
+      canvas,
+      video {
+        position: absolute;
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .right {
+        background-color: #ffffff;
+        position: relative;
+      }
+      #ball {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: orange;
+        border-radius: 50%;
+        top: 500px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      #basket {
+        position: absolute;
+        width: 100px;
+        height: 50px;
+        background-color: brown;
+        border-radius: 10px;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      #score {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 24px;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="left">
+      <video id="video" autoplay></video><canvas id="canvas"></canvas>
+    </div>
+    <div class="right">
+      <div id="score">Score: 0</div>
+      <div id="ball"></div>
+      <div id="basket"></div>
+    </div>
+    <script>
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const ball = document.getElementById("ball");
+      const basket = document.getElementById("basket");
+      const scoreDisplay = document.getElementById("score");
+
+      let detector;
+      let score = 0;
+
+      // Resize the canvas to match the video dimensions
+      function resizeCanvas() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      }
+
+      // Set up the video feed
+      async function setupCamera() {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 },
+        });
+        video.srcObject = stream;
+        return new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            resizeCanvas();
+            resolve(video);
+          };
+        });
+      }
+
+      // Initialize Pose Detection
+      async function loadDetector() {
+        const model = poseDetection.SupportedModels.MoveNet;
+        const config = {
+          modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+        };
+        detector = await poseDetection.createDetector(model, config);
+      }
+
+      // Draw Pose Keypoints and Skeleton
+      function drawPose(keypoints) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height); // Draw the video frame
+
+        keypoints.forEach((keypoint) => {
+          if (keypoint.score > 0.5) {
+            // Draw keypoints
+            ctx.beginPath();
+            ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = "red";
+            ctx.fill();
+          }
+        });
+
+        // Draw skeleton (connect keypoints)
+        const connections = [
+          ["left_shoulder", "right_shoulder"],
+          ["left_shoulder", "left_elbow"],
+          ["right_shoulder", "right_elbow"],
+          ["left_elbow", "left_wrist"],
+          ["right_elbow", "right_wrist"],
+        ];
+
+        connections.forEach(([partA, partB]) => {
+          const pointA = keypoints.find((kp) => kp.name === partA);
+          const pointB = keypoints.find((kp) => kp.name === partB);
+
+          if (pointA && pointB && pointA.score > 0.5 && pointB.score > 0.5) {
+            ctx.beginPath();
+            ctx.moveTo(pointA.x, pointA.y);
+            ctx.lineTo(pointB.x, pointB.y);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "blue";
+            ctx.stroke();
+          }
+        });
+      }
+
+      // Animate the ball based on hand position
+      function animateBall(success) {
+        const targetX = success
+          ? basket.offsetLeft + 25
+          : basket.offsetLeft + 150; // Move inside or outside
+        const targetY = basket.offsetTop;
+
+        gsap.to(ball, {
+          duration: 1,
+          top: targetY + "px",
+          left: targetX + "px",
+          ease: "power1.inOut",
+          onComplete: () => {
+            if (success) {
+              score++;
+              scoreDisplay.textContent = `Score: ${score}`;
+            }
+            setTimeout(() => {
+              resetBall();
+            }, 500); // Reset ball after animation
+          },
+        });
+      }
+
+      // Reset ball to its original position
+      function resetBall() {
+        gsap.to(ball, {
+          duration: 0.5,
+          top: "500px",
+          left: "50%",
+          ease: "power1.inOut",
+        });
+      }
+
+      // Process Pose Detection
+      async function detectPose() {
+        if (!detector || !video) return;
+
+        const poses = await detector.estimatePoses(video);
+
+        if (poses.length > 0) {
+          const keypoints = poses[0].keypoints;
+
+          drawPose(keypoints); // Draw the pose on the canvas
+
+          // Get the wrist and head positions
+          const leftWrist = keypoints.find((kp) => kp.name === "left_wrist");
+          const rightWrist = keypoints.find((kp) => kp.name === "right_wrist");
+          const nose = keypoints.find((kp) => kp.name === "nose");
+
+          if (leftWrist && rightWrist && nose) {
+            // Check if either hand is lifted above the nose
+            if (leftWrist.y < nose.y || rightWrist.y < nose.y) {
+              animateBall(true); // Move ball into the basket
+            } else {
+              animateBall(false); // Move ball outside the basket
+            }
+          }
+        }
+
+        requestAnimationFrame(detectPose);
+      }
+
+      // Main Function
+      async function main() {
+        await setupCamera();
+        await loadDetector();
+        detectPose();
+      }
+
+      main();
+    </script>
+  </body>
+</html>
