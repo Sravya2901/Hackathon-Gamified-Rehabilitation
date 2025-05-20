@@ -216,7 +216,7 @@ function signup(event) {
 
   // Redirect to appropriate page
   if (role === "patient") {
-    window.location.href = "/home"; // Redirect to home page first
+    window.location.href = "/user-dashboard"; // Redirect to home page first
   } else if (role === "therapist") {
     window.location.href = "/patient-details";
   }
